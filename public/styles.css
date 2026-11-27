@@ -76,3 +76,21 @@ footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line);
 .gm-content table { border-collapse:collapse }
 .gm-content td,.gm-content th { border:1px solid #ced9d2; padding:.4rem }
 @media(max-width:720px){.gm-layout{grid-template-columns:1fr}.gm-layout nav{max-height:32vh}}
+
+/* Campaign dashboards and GM-private chronicles */
+.campaign-card { border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+.campaign-card h3 { margin: 0 0 .75rem; }
+.campaign-dashboard h4 { margin: .85rem 0 .35rem; }
+.campaign-dashboard p { margin: .3rem 0 .65rem; line-height: 1.45; }
+.campaign-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: .6rem; margin: .75rem 0; }
+.campaign-stats div { padding: .7rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper); }
+.campaign-stats dt { font-size: .8rem; color: var(--muted); }
+.campaign-stats dd { margin: .25rem 0 0; font-weight: 700; font-size: 1.25rem; }
+.campaign-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.campaign-chronicles, .chronicle-session, .session-chronicle { padding: .75rem; margin: .7rem 0; border: 1px solid var(--line); border-radius: .5rem; }
+.campaign-chronicles summary, .chronicle-session summary { cursor: pointer; font-weight: 650; }
+.chronicle-entries { padding-left: 1.25rem; }
+.chronicle-entry { padding: .7rem 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.chronicle-entry:last-child { border-bottom: 0; }
+.chronicle-text { white-space: pre-wrap; }
+.session-chronicle h4 { margin-top: 0; }
