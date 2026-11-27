@@ -1,5 +1,6 @@
 import { element, button } from "../../components/dom.js";
 import { renderPublishedContent } from "./published-content.js";
+import { availableDegrees, degreeLabels, outcomeStorageKey, readOutcomes, writeOutcomes, createOutcome, correctOutcome, removeOutcome, outcomeNarrative } from "../../domain/outcomes.js";
 
 export function openWorkspace(snapshot, moduleTitle, ownerId, exit, readerUrl) {
   const root = element("section");
@@ -14,60 +15,105 @@ export function openWorkspace(snapshot, moduleTitle, ownerId, exit, readerUrl) {
   const pcs = new Map();
   let selectedPc = "";
   let currentButton;
-  const storageKey = ownerId && JSON.stringify(["gm-session", ownerId, snapshot.moduleId, snapshot.revision]);
-  let history = [];
-  if (storageKey) {
-    try { history = JSON.parse(sessionStorage.getItem(storageKey) || "[]"); } catch {}
-  }
-  if (!Array.isArray(history)) history = [];
+  const storageKey = outcomeStorageKey(ownerId, snapshot);
+  let storage;
+  try { storage = window.sessionStorage; } catch {}
+  const loaded = readOutcomes(storage, storageKey);
+  let history = loaded.records;
+  let writable = loaded.writable;
+  const storageStatus = element("p", loaded.warning);
+  storageStatus.setAttribute("role", "status");
+  storageStatus.hidden = !loaded.warning;
   const feedback = element("p");
   feedback.setAttribute("role", "status");
 
   function save() {
-    if (!storageKey) return;
-    try { sessionStorage.setItem(storageKey, JSON.stringify(history)); }
-    catch { feedback.textContent += " Browser storage is unavailable. Keep this view open."; }
+    if (!writable) return;
+    if (!writeOutcomes(storage, storageKey, history)) {
+      writable = false;
+      storageStatus.hidden = false;
+      storageStatus.textContent = "Browser storage is unavailable. New changes are temporary; keep this view open.";
+    }
+  }
+
+  function renderHistory(log, pageId = null) {
+    log.replaceChildren(element("h3", pageId ? "Recorded outcomes" : "Outcome history"));
+    const entries = history.filter(item => pageId === null || item.pageId === pageId);
+    if (!entries.length) log.append(element("p", "No accepted outcomes yet."));
+    for (const entry of entries) {
+      const source = Object.hasOwn(snapshot.pages, entry.pageId) ? snapshot.pages[entry.pageId] : null;
+      const table = source?.challenges?.find(check => check.id === entry.tableId);
+      const row = element("section");
+      row.append(element("h4", entry.actor + " · " + entry.table + " · " + entry.label));
+      if (!pageId) row.append(element("p", source?.title || "Source page unavailable"));
+      row.append(element("p", outcomeNarrative(entry, table) || "Authored result text unavailable."));
+      row.append(element("small", entry.recordedAt ? "Recorded " + new Date(entry.recordedAt).toLocaleString() : "Original recording time unavailable"));
+      if (entry.correctedAt) row.append(element("p", "Corrected " + new Date(entry.correctedAt).toLocaleString()));
+      const choices = availableDegrees(table).filter(degree => degree !== entry.degree);
+      if (choices.length) {
+        const details = element("details");
+        details.append(element("summary", "Correct result"));
+        for (const degree of choices) {
+          const control = button(degreeLabels[degree], () => {
+            history = correctOutcome(history, entry.key, { pageId: entry.pageId, table, degree, correctedAt: new Date().toISOString() });
+            feedback.textContent = "Outcome corrected.";
+            save();
+            renderHistory(log, pageId);
+          });
+          control.setAttribute("aria-label", "Correct " + entry.table + " to " + degreeLabels[degree]);
+          details.append(control, element("p", table.degrees[degree]));
+        }
+        row.append(details);
+      }
+      row.append(button("Remove outcome", () => {
+        history = removeOutcome(history, entry.key);
+        feedback.textContent = "Outcome removed.";
+        save();
+        renderHistory(log, pageId);
+      }));
+      log.append(row);
+    }
+  }
+
+  function showHistory() {
+    currentButton?.removeAttribute("aria-current");
+    currentButton = undefined;
+    page.replaceChildren(element("h2", "Outcome history"));
+    const log = element("section");
+    feedback.textContent = "";
+    page.append(feedback, log);
+    renderHistory(log);
   }
 
   function show(id) {
+    if (!Object.hasOwn(snapshot.pages, id)) return;
     const data = snapshot.pages[id];
-    if (!data) return;
     page.replaceChildren(element("h2", data.title));
     if (data.subtitle) page.append(element("p", data.subtitle));
     renderPublishedContent(page, data);
     const log = element("section");
-    function renderLog() {
-      log.replaceChildren();
-      for (const entry of history.filter(item => item.pageId === id)) {
-        const row = element("p", entry.actor + " · " + entry.table + " · " + entry.label + " ");
-        row.append(button("Undo", () => {
-          history = history.filter(item => item.key !== entry.key);
-          feedback.textContent = "Outcome removed.";
-          save();
-          renderLog();
-        }));
-        log.append(row);
-      }
-    }
-    for (const table of data.challenges) {
+    for (const table of data.challenges || []) {
       const block = element("section");
       block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" · ")));
-      for (const [degree, label] of Object.entries({ criticalSuccess:"Critical success", success:"Success", failure:"Failure", criticalFailure:"Critical failure" })) {
-        if (!table.degrees[degree]) continue;
-        block.append(button(label, () => {
+      for (const degree of availableDegrees(table)) {
+        block.append(button(degreeLabels[degree], () => {
           const actor = pcs.get(selectedPc) || "Party";
-          history.push({ key:crypto.randomUUID(), pageId:id, tableId:table.id, table:table.title, pcId:selectedPc || null, actor, degree, label });
-          feedback.textContent = actor + " · " + label + ". " + table.degrees[degree];
+          const record = createOutcome({
+            key: crypto.randomUUID(), pageId: id, table, pcId: selectedPc || null,
+            actor, degree, recordedAt: new Date().toISOString(),
+          });
+          history.push(record);
+          feedback.textContent = actor + " · " + record.label + ". " + record.outcomeText;
           selectPc("");
           save();
-          renderLog();
+          renderHistory(log, id);
         }));
       }
       page.append(block);
     }
     feedback.textContent = "";
-    renderLog();
     page.append(feedback, log);
+    renderHistory(log, id);
   }
 
   function collectPcs(nodes) {
@@ -137,13 +183,13 @@ export function openWorkspace(snapshot, moduleTitle, ownerId, exit, readerUrl) {
   }
   selectPc("");
   const sidebar = element("aside");
-  sidebar.append(roster, nav);
+  sidebar.append(roster, button("Outcome history", showHistory), nav);
   layout.append(sidebar, page);
   const reader = element("a", "Read full syndication");
   reader.href = readerUrl;
   reader.target = "_blank";
   reader.rel = "noopener noreferrer";
-  root.append(back, reader, heading, layout);
+  root.append(back, reader, heading, storageStatus, layout);
   document.getElementById("overview-panel").after(root);
   const first = nav.querySelector("button");
   if (first) first.click();
