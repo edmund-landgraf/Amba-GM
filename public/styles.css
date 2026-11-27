@@ -71,5 +71,8 @@ footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line);
 .gm-layout button { cursor:pointer; margin:.15rem; padding:.35rem .55rem }
 .gm-layout nav button { border:0; background:transparent; color:inherit; text-align:left }
 .gm-layout [aria-current=page],.gm-layout [aria-pressed=true] { background:#205b46; color:white }
-.gm-layout iframe { width:100%; min-height:36vh; border:0 }
+.gm-layout article img { max-width:100%; height:auto }
+.gm-content { overflow-x:auto; line-height:1.55 }
+.gm-content table { border-collapse:collapse }
+.gm-content td,.gm-content th { border:1px solid #ced9d2; padding:.4rem }
 @media(max-width:720px){.gm-layout{grid-template-columns:1fr}.gm-layout nav{max-height:32vh}}
