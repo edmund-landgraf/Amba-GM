@@ -14,7 +14,7 @@ function downloadJson(value, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, readerUrl, exit }) {
+export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, readerUrl, exit, isCurrent }) {
   const root = element("section");
   root.className = "panel";
   const status = element("p");
@@ -96,5 +96,5 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, rea
     }
   } catch { /* no legacy storage access */ }
   await refresh();
-  document.getElementById("overview-panel").after(root);
+  if (isCurrent()) document.getElementById("overview-panel").after(root);
 }
