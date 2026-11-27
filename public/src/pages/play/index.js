@@ -53,7 +53,7 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
       feedback.textContent = message;
       return true;
     } catch (error) {
-      feedback.textContent = error.message || "Campaign update failed. Nothing was recorded.";
+      feedback.textContent = (error.message || "Campaign update failed.") + " Reopen the campaign to confirm its saved state.";
       return false;
     } finally {
       busy = false;
