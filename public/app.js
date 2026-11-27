@@ -40,13 +40,6 @@ async function apiGet(path) {
   return response.json();
 }
 
-function textFromNarrative(narratives) {
-  const first = Array.isArray(narratives) ? narratives[0] : null;
-  if (!first || typeof first.content !== "string") return "";
-  const document = new DOMParser().parseFromString(first.content, "text/html");
-  return (document.body.textContent || "").replace(/\s+/g, " ").trim();
-}
-
 function displayModuleTitle(module) {
   const status = module.publicationStatus === "published" ? "Published" : "Draft";
   return `${module.title} · ${status}`;
@@ -117,7 +110,7 @@ function openOverview() {
   $("overview-subtitle").textContent = module.subtitle || "";
   $("publication-status").className = `status ${module.publicationStatus === "published" ? "published" : "draft"}`;
   $("publication-status").textContent = module.publicationStatus === "published" ? "Published" : "Draft";
-  $("overview-description").textContent = textFromNarrative(module.narratives) || "No overview text is available in the module list.";
+  $("overview-description").textContent = module.subtitle || "Module details are loaded from AMBA. Full adventure content will appear when the read-only published snapshot is connected.";
   const facts = $("overview-facts");
   facts.replaceChildren();
   appendFact(facts, "Setting", module.setting);
