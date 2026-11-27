@@ -28,4 +28,4 @@ Configure the AMBA API origin in `public/config.js`. Cross-origin session access
 
 The module list and lightweight overview are wired to AMBA's current read endpoints. Full adventure loading and campaign creation need a read-only published-snapshot API from AMBA.
 
-See [docs/PRODUCT.md](docs/PRODUCT.md), [docs/ROADMAP.md](docs/ROADMAP.md), and [docs/AMBA-CONNECTION.md](docs/AMBA-CONNECTION.md).
+See [docs/PRODUCT.md](docs/PRODUCT.md), [docs/ROADMAP.md](docs/ROADMAP.md), and [docs/AMBA-CONNECTION.md](docs/AMBA-CONNECTION.md). The current five-screen UI mockups are in [docs/play-now-mockups.html](docs/play-now-mockups.html), with roll attribution details in [docs/GM-ROLL-RECORDING.md](docs/GM-ROLL-RECORDING.md).
