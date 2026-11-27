@@ -15,8 +15,8 @@ jobs:
           node-version: '22'
       - run: npm test
       - name: Check client JavaScript syntax
-        run: find public/src -name '*.js' -print0 | xargs -0 -n1 node --check
-      - run: node --check public/app.js && node --check tools/dev-server.mjs
+        run: find public/src server -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+      - run: node --check public/app.js && node --check tools/dev-server.mjs && node --check tools/browser-smoke.mjs
 
       - name: Install pinned browser test tooling
         run: npm install --no-save --package-lock=false playwright@1.58.2
