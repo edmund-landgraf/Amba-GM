@@ -44,7 +44,7 @@ try {
   page.on("dialog", dialog => dialog.accept());
   await context.route("**/config.js", route => route.fulfill({
     contentType: "application/javascript",
-    body: 'window.AMBA_GM_CONFIG = {apiBaseUrl: "/api/v1", appUrl: "/"};'
+    body: 'window.AMBA_GM_CONFIG = ' + JSON.stringify({ apiBaseUrl: origin + "/api/v1", appUrl: origin }) + ';'
   }));
   await context.route("**/api/v1/**", async route => {
     const path = new URL(route.request().url()).pathname;
