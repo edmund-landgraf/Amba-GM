@@ -41,3 +41,7 @@ A later attempt is a separate record. Do not silently replace earlier attempts. 
 - Requiring a Foundry journal UUID to be copied back and forth.
 - Automatic progression, consequences, rewards, or player reveals based only on a roll.
 - A second result panel or a post-encounter questionnaire.
+
+## Accepted outcome history — first client-side slice
+
+Each click now retains the exact authored outcome text and timestamp with the check and actor identity. Each attempt remains separate. The workspace history button lists accepted outcomes across the selected publication; encounter pages also show their own records. Correction buttons select another authored degree for that same check while preserving original attribution and time; removal deletes only the selected record. Older tab records keep unknown timestamps and recover text only from the matching check in the same publication. Corrupt or inaccessible browser storage is reported rather than silently replaced. Records remain tab-local, keyed by authenticated account/module/publication refresh revision; this is not shared or durable campaign persistence. Republished revisions intentionally do not automatically inherit history yet. No provider or combat integration, freeform text fields, or player reveal is added. Unit tests: `npm test` (Node 20+); browser acceptance and deployed API integration remain separate.
