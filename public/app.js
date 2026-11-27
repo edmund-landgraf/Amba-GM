@@ -159,7 +159,7 @@ async function openOverview() {
         openWorkspace(snapshot, module.title, state.user?.user?.id || state.user?.id, () => {
           overviewPanel.classList.remove("hidden");
           document.querySelector(".intro").hidden = false;
-        });
+        }, url.href);
         overviewPanel.classList.add("hidden");
         document.querySelector(".intro").hidden = true;
         note.textContent = "Full publication ready.";
