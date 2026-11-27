@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -19,7 +19,7 @@ jobs:
       - run: node --check public/app.js && node --check tools/dev-server.mjs
 
       - name: Install pinned browser test tooling
-        run: npm install --no-save --package-lock=false playwright@1.51.1
+        run: npm install --no-save --package-lock=false playwright@1.58.2
       - name: Install Chromium for the smoke test
         run: npx playwright install --with-deps chromium
       - name: Exercise campaign lifecycle in a real browser
