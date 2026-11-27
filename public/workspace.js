@@ -11,7 +11,7 @@ function button(label, click) {
   return el;
 }
 
-export function openWorkspace(snapshot, moduleTitle, ownerId, exit) {
+export function openWorkspace(snapshot, moduleTitle, ownerId, exit, readerUrl) {
   const root = element("section");
   root.className = "gm-workspace";
   const back = button("Back to overview", () => { root.remove(); exit(); });
@@ -165,7 +165,19 @@ export function openWorkspace(snapshot, moduleTitle, ownerId, exit) {
     return list;
   }
 
-  nav.append(tree(snapshot.tree, 0));
+  const moduleRoot = snapshot.tree.find(node => node.kind === "module");
+  const acts = moduleRoot?.children?.find(node => node.typeKey === "acts");
+  const storyTypes = new Set(["act", "scene", "subscene", "encounter", "folder"]);
+  function storyNodes(nodes) {
+    return nodes.flatMap(node => {
+      if (node.kind !== "narrative" && !(node.kind === "container" && storyTypes.has(node.typeKey))) return [];
+      const children = storyNodes(node.children || []);
+      return node.typeKey === "folder" && !children.length ? [] : [{ ...node, children }];
+    });
+  }
+  const story = storyNodes(acts?.children || []);
+  nav.setAttribute("aria-label", "Story acts");
+  nav.append(tree(story, 0));
   const roster = element("fieldset");
   roster.append(element("legend", "Record for"));
   function selectPc(id) {
@@ -181,7 +193,13 @@ export function openWorkspace(snapshot, moduleTitle, ownerId, exit) {
   const sidebar = element("aside");
   sidebar.append(roster, nav);
   layout.append(sidebar, page);
-  root.append(back, heading, layout);
+  const reader = element("a", "Read full syndication");
+  reader.href = readerUrl;
+  reader.target = "_blank";
+  reader.rel = "noopener noreferrer";
+  root.append(back, reader, heading, layout);
   document.getElementById("overview-panel").after(root);
-  show(snapshot.pages[snapshot.moduleId] ? snapshot.moduleId : Object.keys(snapshot.pages)[0]);
+  const first = nav.querySelector("button");
+  if (first) first.click();
+  else page.append(element("p", story.length ? "Expand an act to choose a story node." : "This publication has no story acts."));
 }
