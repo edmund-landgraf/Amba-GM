@@ -19,13 +19,15 @@ Configure the AMBA API origin in `public/config.js`. Cross-origin session access
 ## Boundaries
 
 - The selected AMBA module remains read-only.
-- Button-confirmed outcome records will be scoped to a GM's campaign.
+- Button-confirmed outcome records are scoped to a GM's independent campaign.
 - Foundry, WGUI, Owlbear, and manual play remain optional providers.
 - The initial runtime does not track combat, automate rules, infer events, or run branching logic.
 - Credentials are not collected or stored by this starter.
 
 ## Status
 
-The module list and lightweight overview are wired to AMBA's current read endpoints. Open GM workspace requests the selected module’s full publication from the authenticated AMBA endpoint `GET /api/v1/modules/:moduleId/syndication/gm`. Deploy the corresponding AMBA route before using this build. The GM view follows the published navigation tree, opens branches on demand, and displays the selected page and authored PF2e challenge results. Click a roster PC or use Party, then click a result to record it. Records currently live in this browser tab, scoped to the signed-in account, module, and publication revision. Shared campaign persistence and external roller attribution are pending.
+The module list and lightweight overview are wired to AMBA's current read endpoints. Open GM workspace requests the selected module’s full publication from the authenticated AMBA endpoint `GET /api/v1/modules/:moduleId/syndication/gm`. Deploy the corresponding AMBA route before using this build. The GM view follows the published navigation tree, opens branches on demand, and displays the selected page and authored PF2e challenge results. Click a roster PC or use Party, then click a result to record it. Campaign records are persisted through AMBA's authenticated GM runtime API in a separate PostgreSQL table, scoped to account, module and campaign. Start/end sessions, save navigation, record/correct/remove accepted authored outcomes and resume in a fresh browser. Deploy the additive AMBA migration and API before this client. Publication revision changes block mutation; older history remains exportable. Previous browser-only records stay local and may be exported explicitly, not automatically migrated. External roller attribution is pending.
 
 See [docs/PRODUCT.md](docs/PRODUCT.md), [docs/ROADMAP.md](docs/ROADMAP.md), and [docs/AMBA-CONNECTION.md](docs/AMBA-CONNECTION.md). The current five-screen UI mockups are in [docs/play-now-mockups.html](docs/play-now-mockups.html), with roll attribution details in [docs/GM-ROLL-RECORDING.md](docs/GM-ROLL-RECORDING.md).
+
+See [server campaign persistence](docs/SERVER-CAMPAIGNS.md) for the API contract, deployment order, legacy storage policy and verification.
