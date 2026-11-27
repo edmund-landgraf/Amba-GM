@@ -6,7 +6,7 @@ The current AMBA API already provides the module list used by its authoring modu
 
 - `GET /api/v1/auth/me` checks the authenticated session.
 - `GET /api/v1/modules?status=both` returns the signed-in user's module list, including draft and published modules.
-- Each list row includes the module metadata and first narrative used to show a lightweight module overview. The route is user-scoped and excludes the user-content workspace.
+- Each list row includes module metadata, a subtitle when present, and the counts needed for a lightweight overview. The route is user-scoped and excludes the user-content workspace.
 
 AMBA GM calls these endpoints with the browser's existing AMBA session cookie (`credentials: include`). It does not collect or persist an AMBA password or API token. The app displays this list in a native dropdown, then opens an overview based on the selected module row.
 
@@ -24,7 +24,7 @@ The server listens on `http://127.0.0.1:4173` by default. Set `PORT` to change t
 
 ## Current limitation
 
-The module overview is built from the module-list response and first narrative. The current detailed module endpoint is editor-authorized and can perform editor maintenance on read, so this app does not call it. AMBA still needs a read-only, owner-authorized published-snapshot endpoint before a GM can load the full adventure or start a campaign.
+The module overview is built from stable module-list metadata and the module subtitle when present. The current detailed module endpoint is editor-authorized and can perform editor maintenance on read, so this app does not call it. AMBA still needs a read-only, owner-authorized published-snapshot endpoint before a GM can load the full adventure or start a campaign.
 
 ## Next AMBA-side contract
 
