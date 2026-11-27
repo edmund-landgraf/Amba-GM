@@ -15,14 +15,15 @@ AMBA GM is the separate Play Now runtime for GMs running adventures authored and
 - Owner-authenticated GM runtime.
 - Select and open an available published adventure snapshot.
 - Navigate the adventure and access relevant narrative, artifacts, maps, NPCs, PCs, and references.
-- Record concise GM-confirmed notes and author-defined consequential outcomes.
+- Record concise GM-confirmed notes and author-defined consequential outcomes. Accept check outcomes by button from provider logs or button-only PC/Party and degree selection.
 - Correct or remove records and retrieve them later in context.
 - Keep GM notes and outcomes private unless the GM explicitly chooses otherwise.
 
 ## Out of scope initially
 
+- In-app dice rolling, typed roll results, or raw dice-log transcript storage.
 - Combat transcript ingestion, storage, or archival.
-- Initiative, HP, conditions, targeting, damage, or rules automation.
+- Initiative, HP, conditions, targeting, damage, ongoing poison tracking, or rules automation.
 - Automatic story progression, inferred events, branching conditions, or automatic rewards.
 - Required player accounts or a player-facing app.
 - Embedded AI or automatic interpretation of prose.
@@ -32,6 +33,7 @@ AMBA GM is the separate Play Now runtime for GMs running adventures authored and
 
 1. A published adventure snapshot is read-only from the runtime.
 2. Campaign state is separate from authored definitions and isolated per game.
+3. The game system resolves mechanics; AMBA GM stores accepted narrative outcomes and roller attribution.
 3. The author decides which facts matter; the GM decides what happened.
 4. Unrecorded, unknown, negative, skipped, and not applicable are distinct states where relevant.
 5. Ordinary encounters should remain runnable without extra event prompts.
