@@ -1,20 +1,31 @@
 # AMBA GM
 
-A separate GM-facing runtime for running published AMBA adventures.
+A separate GM-facing runtime for running adventures authored and published in AMBA.
 
-This repository is the home of the GM Play Now application. AMBA remains the authoring and publishing system; this app consumes published adventure data and adds campaign-specific play state.
+AMBA remains the authoring and publishing system. AMBA GM reads its module list and published content, then keeps campaign-specific notes and outcomes in this app.
 
-## Initial direction
+## Current starter
 
-- Separate application and repository from AdventureMakerByAct.
-- Read from a published AMBA snapshot; do not mutate the author's source content.
-- Keep GM runtime state campaign-scoped and private by default.
-- Work without Foundry or WGUI; integrations are optional gameplay providers.
-- Focus first on the GM run surface, contextual references, and compact recording of meaningful outcomes.
-- Do not build combat tracking, a branching engine, or embedded AI into the initial runtime.
+The first screen connects with the browser's existing AMBA sign-in, loads the same draft-and-published module list used by AMBA's module picker, and opens a lightweight GM module overview.
+
+The starter uses a small dependency-free Node static server:
+
+```sh
+npm run dev
+```
+
+Configure the AMBA API origin in `public/config.js`. Cross-origin session access requires credentialed CORS from AMBA for the GM app's exact origin.
+
+## Boundaries
+
+- The selected AMBA module remains read-only.
+- Campaign notes and outcomes will be scoped to a GM's campaign.
+- Foundry, WGUI, Owlbear, and manual play remain optional providers.
+- The initial runtime does not track combat, automate rules, infer events, or run branching logic.
+- Credentials are not collected or stored by this starter.
 
 ## Status
 
-Starter scaffold only. No application behavior or data persistence is implemented yet.
+The module list and lightweight overview are wired to AMBA's current read endpoints. Full adventure loading and campaign creation need a read-only published-snapshot API from AMBA.
 
-See [docs/PRODUCT.md](docs/PRODUCT.md) for boundaries and [docs/ROADMAP.md](docs/ROADMAP.md) for the initial sequence.
+See [docs/PRODUCT.md](docs/PRODUCT.md), [docs/ROADMAP.md](docs/ROADMAP.md), and [docs/AMBA-CONNECTION.md](docs/AMBA-CONNECTION.md).
