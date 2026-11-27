@@ -87,18 +87,30 @@ export function openWorkspace(snapshot, moduleTitle, ownerId, exit) {
     page.append(feedback, log);
   }
 
+  function collectPcs(nodes) {
+    for (const node of nodes) {
+      if (node.kind === "pc" && node.pageId) pcs.set(node.pageId, node.title);
+      if (node.children) collectPcs(node.children);
+    }
+  }
+  collectPcs(snapshot.tree);
+
   function tree(nodes, depth) {
     const list = element("ul");
     for (const node of nodes) {
       const item = element("li");
       const title = [node.areaCode, node.title].filter(Boolean).join(" ");
-      if (node.kind === "pc" && node.pageId) pcs.set(node.pageId, node.title);
       let row = item;
       if (node.children?.length) {
         const branch = element("details");
         branch.open = depth === 0;
         const summary = element("summary");
-        branch.append(summary, tree(node.children, depth + 1));
+        branch.append(summary);
+        const populate = () => {
+          if (branch.open && branch.children.length === 1) branch.append(tree(node.children, depth + 1));
+        };
+        branch.addEventListener("toggle", populate);
+        populate();
         item.append(branch);
         row = summary;
       }
