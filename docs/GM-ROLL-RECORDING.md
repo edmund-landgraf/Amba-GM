@@ -2,7 +2,7 @@
 
 ## Product boundary
 
-AMBA GM never rolls dice and has no text entry for roll results. The game system resolves the check and tracks its mechanical effects. AMBA GM records only the narrative fact that a check occurred, who made it, and which authored degree of success applied.
+AMBA GM never rolls dice and has no text-entry fields. The live app uses buttons only. The game system resolves the check and tracks its mechanical effects. AMBA GM records only the narrative fact that a check occurred, who made it, and which authored degree of success applied.
 
 For example, the GM may see a DC 18 check and its authored critical failure text. The GM handles any poison damage or condition in Foundry, Wanderer's Guide, or at the table. AMBA GM does not track damage, conditions, initiative, rounds, recovery, or combat logs.
 
@@ -36,7 +36,7 @@ A later attempt is a separate record. Do not silently replace earlier attempts. 
 
 ## Explicit exclusions
 
-- In-app dice rolling, typed results, typed notes as part of roll capture, or raw dice transcript storage.
+- In-app dice rolling, typed results or notes, freeform text fields, or raw dice transcript storage.
 - Damage, poison duration, conditions, HP, initiative, round tracking, or automated mechanics.
 - Requiring a Foundry journal UUID to be copied back and forth.
 - Automatic progression, consequences, rewards, or player reveals based only on a roll.
