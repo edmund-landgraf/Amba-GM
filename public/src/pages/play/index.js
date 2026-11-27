@@ -4,6 +4,8 @@ import { availableDegrees, degreeLabels, outcomeNarrative } from "../../domain/o
 import { activeSession } from "../../domain/campaigns.js";
 import { collectPlayerCharacters, containsPage, projectStoryActs } from "../../domain/story-tree.js";
 import { renderSessionControls } from "./session-controls.js";
+import { deriveChronicles } from "../../domain/chronicles.js";
+import { sessionMetadata } from "../campaigns/dashboard.js";
 
 export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exit, readerUrl, mountAfter) {
   let campaign = initialCampaign;
@@ -34,7 +36,7 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
       end: () => {
         const active = activeSession(campaign);
         if (!busy && active && window.confirm("End session " + active.number + "? Recorded outcomes will remain available."))
-          void mutate({ type: "end", sessionId: active.id }, "Session ended.");
+          void mutate({ type: "end", sessionId: active.id }, "Session ended. Your chronicle is up to date.", showHistory);
       },
       history: () => { if (!busy) showHistory(); },
     });
@@ -65,9 +67,10 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     return true;
   }
 
-  function renderHistory(log, pageId = null) {
-    log.replaceChildren(element("h3", pageId ? "Recorded outcomes" : "Outcome history"));
-    const entries = campaign.outcomes.filter(item => pageId === null || item.pageId === pageId);
+  function renderHistory(log, pageId = null, sessionId = null) {
+    log.replaceChildren(element(sessionId ? "h5" : "h3", pageId ? "Recorded outcomes" : "Outcome history"));
+    const entries = campaign.outcomes.filter(item => (pageId === null || item.pageId === pageId) && (sessionId === null || item.sessionId === sessionId))
+      .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt));
     if (!entries.length) log.append(element("p", "No accepted outcomes yet."));
     for (const entry of entries) {
       const source = Object.hasOwn(snapshot.pages, entry.pageId) ? snapshot.pages[entry.pageId] : null;
@@ -107,16 +110,21 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     const sessions = element("section");
     sessions.append(element("h3", "Sessions"));
     if (!campaign.sessions.length) sessions.append(element("p", "No sessions yet."));
-    for (const session of campaign.sessions) {
-      const count = campaign.outcomes.filter(o => o.sessionId === session.id).length;
-      sessions.append(element("h4", "Session " + session.number + (session.endedAt ? " · Completed" : " · Active")));
-      sessions.append(element("p", new Date(session.startedAt).toLocaleString() +
-        (session.endedAt ? " - " + new Date(session.endedAt).toLocaleString() : "") + " · " + count + " accepted outcomes"));
+    sessions.append(element("p", "Chronicles reflect accepted outcomes only. Corrections and removals update this history; unrecorded events remain unknown."));
+    const chronicles = deriveChronicles(campaign, snapshot);
+    for (const session of [...chronicles].reverse()) {
+      const section = element("section");
+      section.className = "session-chronicle";
+      section.append(element("h4", "Session " + session.number + (session.active ? " · Active" : " · Completed")));
+      section.append(element("p", sessionMetadata(session)));
+      const log = element("div");
+      renderHistory(log, null, session.id);
+      section.append(log);
+      sessions.append(section);
     }
-    const log = element("section");
+    if (!chronicles.length) sessions.append(element("p", "No accepted outcomes yet."));
     feedback.textContent = "";
-    page.append(sessions, log);
-    renderHistory(log);
+    page.append(sessions);
   }
 
   function show(id) {
