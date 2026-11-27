@@ -70,7 +70,8 @@ export function changeCampaign(campaigns, { id, expectedVersion, revision, comma
     case "start":
       requireThat(!active, "A session is already active.");
       requireThat(text(command.sessionId) && !before.sessions.some(s => s.id === command.sessionId), "Invalid session identity.");
-      next = { ...before, sessions: [...before.sessions, { id: command.sessionId, number: before.sessions.length + 1, startedAt: now, endedAt: null }] };
+      requireThat(command.pageId == null || text(command.pageId), "Invalid starting position.");
+      next = { ...before, lastPageId: command.pageId ?? before.lastPageId, sessions: [...before.sessions, { id: command.sessionId, number: before.sessions.length + 1, startedAt: now, endedAt: null }] };
       break;
     case "end":
       requireThat(active && active.id === command.sessionId, "This session is not active.");
