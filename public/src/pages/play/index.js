@@ -73,9 +73,9 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
       const source = Object.hasOwn(snapshot.pages, entry.pageId) ? snapshot.pages[entry.pageId] : null;
       const table = source?.challenges?.find(check => check.id === entry.tableId);
       const row = element("section");
-      row.append(element("h4", entry.actor + " � " + entry.table + " � " + entry.label));
+      row.append(element("h4", entry.actor + " · " + entry.table + " · " + entry.label));
       const session = campaign.sessions.find(s => s.id === entry.sessionId);
-      row.append(element("p", "Session " + (session?.number ?? "?") + (pageId ? "" : " � " + (source?.title || "Source page unavailable"))));
+      row.append(element("p", "Session " + (session?.number ?? "?") + (pageId ? "" : " · " + (source?.title || "Source page unavailable"))));
       row.append(element("p", outcomeNarrative(entry, table) || "Authored result text unavailable."));
       row.append(element("small", entry.recordedAt ? "Recorded " + new Date(entry.recordedAt).toLocaleString() : "Original recording time unavailable"));
       if (entry.correctedAt) row.append(element("p", "Corrected " + new Date(entry.correctedAt).toLocaleString()));
@@ -109,9 +109,9 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     if (!campaign.sessions.length) sessions.append(element("p", "No sessions yet."));
     for (const session of campaign.sessions) {
       const count = campaign.outcomes.filter(o => o.sessionId === session.id).length;
-      sessions.append(element("h4", "Session " + session.number + (session.endedAt ? " � Completed" : " � Active")));
+      sessions.append(element("h4", "Session " + session.number + (session.endedAt ? " · Completed" : " · Active")));
       sessions.append(element("p", new Date(session.startedAt).toLocaleString() +
-        (session.endedAt ? " - " + new Date(session.endedAt).toLocaleString() : "") + " � " + count + " accepted outcomes"));
+        (session.endedAt ? " - " + new Date(session.endedAt).toLocaleString() : "") + " · " + count + " accepted outcomes"));
     }
     const log = element("section");
     feedback.textContent = "";
@@ -130,14 +130,14 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     const log = element("section");
     for (const table of data.challenges || []) {
       const block = element("section");
-      block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" � ")));
+      block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" · ")));
       for (const degree of availableDegrees(table)) {
         const accept = button(degreeLabels[degree], () => {
           const session = activeSession(campaign);
           if (!session || busy) return;
           const actor = pcs.get(selectedPc) || "Party";
           void mutate({ type: "accept", sessionId: session.id, key: crypto.randomUUID(), pageId: id, table,
-            pcId: selectedPc || null, actor, degree }, actor + " � " + degreeLabels[degree] + ". " + table.degrees[degree], () => {
+            pcId: selectedPc || null, actor, degree }, actor + " · " + degreeLabels[degree] + ". " + table.degrees[degree], () => {
             selectPc("");
             show(id);
           });
