@@ -12,7 +12,7 @@ AMBA GM calls these endpoints with the browser's existing AMBA session cookie (`
 
 ## Environment
 
-Set `public/config.js` to the AMBA API prefix and app URL for the target environment. Production cross-origin use requires AMBA to allow the GM app's exact origin with credentialed CORS. The AMBA session cookie must be available for requests to the AMBA origin. For local development, use the local AMBA API address and confirm its cookie/CORS configuration.
+Set `public/config.js` to the AMBA API prefix and app URL for the target environment. AMBA currently allows the production satellite origin `https://amba-play.unwhelm.online` and, outside production, `http://localhost:3010` and `http://127.0.0.1:3010` with credentialed CORS. The AMBA session cookie must be available for requests to the AMBA origin. Use the local AMBA API address in `public/config.js` during local development.
 
 Run the static shell with Node 20 or later:
 
