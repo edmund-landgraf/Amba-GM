@@ -1,0 +1,39 @@
+# Product boundary
+
+## Purpose
+
+AMBA GM is the separate Play Now runtime for GMs running adventures authored and published with AMBA. It provides a usable live reference surface and stores accepted campaign-specific notes and outcomes without changing the published source.
+
+## System responsibilities
+
+- **AMBA authoring:** creates adventure content, structured challenges, artifacts, references, and explicitly authored event/checkpoint definitions.
+- **AMBA GM:** reads a published snapshot, presents a GM run view, and stores the GM's campaign-specific play record.
+- **Gameplay providers:** Foundry, WGUI, Owlbear, or manual/physical play may resolve game mechanics. No provider is mandatory.
+
+## Initial scope
+
+- Owner-authenticated GM runtime.
+- Select and open an available published adventure snapshot.
+- Navigate the adventure and access relevant narrative, artifacts, maps, NPCs, PCs, and references.
+- Record concise GM-confirmed notes and author-defined consequential outcomes.
+- Correct or remove records and retrieve them later in context.
+- Keep GM notes and outcomes private unless the GM explicitly chooses otherwise.
+
+## Out of scope initially
+
+- Combat transcript ingestion, storage, or archival.
+- Initiative, HP, conditions, targeting, damage, or rules automation.
+- Automatic story progression, inferred events, branching conditions, or automatic rewards.
+- Required player accounts or a player-facing app.
+- Embedded AI or automatic interpretation of prose.
+- Replacing AMBA authoring or any VTT/character manager.
+
+## Core principles
+
+1. A published adventure snapshot is read-only from the runtime.
+2. Campaign state is separate from authored definitions and isolated per game.
+3. The author decides which facts matter; the GM decides what happened.
+4. Unrecorded, unknown, negative, skipped, and not applicable are distinct states where relevant.
+5. Ordinary encounters should remain runnable without extra event prompts.
+6. Manual play must remain fully usable.
+7. Player delivery must be a separately reviewed projection; GM-only material is never exposed by default.
