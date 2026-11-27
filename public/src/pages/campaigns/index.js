@@ -14,7 +14,7 @@ function downloadJson(value, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, readerUrl, exit, isCurrent }) {
+export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, legacyStore, readerUrl, exit, isCurrent }) {
   const root = element("section");
   root.className = "panel";
   const status = element("p");
@@ -85,7 +85,7 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, rea
     }
   }
   root.append(back, element("h2", moduleTitle + " — Campaigns"),
-    element("p", "Campaigns are saved in this browser profile. They are not synchronized to a server or another device. Exports contain GM-private history."),
+    element("p", "Campaigns are saved on the GM server for your AMBA account. Exports contain GM-private history."),
     status, name, create, list);
   // Do not silently assign the predecessor's revision-scoped tab history to any new game.
   try {
@@ -95,6 +95,19 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, rea
         button("Export previous tab outcomes", () => downloadJson({ moduleId: snapshot.moduleId, revision: snapshot.revision, outcomes: legacy.records }, "amba-gm-previous-tab-outcomes.json")));
     }
   } catch { /* no legacy storage access */ }
+  if (legacyStore) {
+    try {
+      const previous = await legacyStore.list();
+      if (previous.length) root.append(
+        element("p", "Existing browser-only campaigns remain untouched. They have not been uploaded or merged. Export them before clearing browser data; server import is not yet available."),
+        button("Export previous browser campaigns", () => downloadJson({
+          schemaVersion: 1, moduleId: snapshot.moduleId, campaigns: previous,
+        }, "amba-gm-browser-campaigns.json"))
+      );
+    } catch {
+      root.append(element("p", "Existing browser campaign storage could not be read; no local records were changed."));
+    }
+  }
   await refresh();
   if (isCurrent()) document.getElementById("overview-panel").after(root);
 }
