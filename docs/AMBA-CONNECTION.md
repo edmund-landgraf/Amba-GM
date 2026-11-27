@@ -20,7 +20,7 @@ Run the static shell with Node 20 or later:
 npm run dev
 ```
 
-The server listens on `http://127.0.0.1:4173` by default. Set `PORT` to change the port.
+The server listens on `http://127.0.0.1:3010` by default. Set `PORT` to change the port.
 
 ## Current limitation
 
