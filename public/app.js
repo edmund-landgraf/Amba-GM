@@ -127,7 +127,7 @@ function openOverview() {
   $("overview-note").textContent = module.publicationStatus === "published"
     ? "This overview comes from AMBA's module list. Opening a campaign will use a frozen published snapshot after the GM snapshot API is connected."
     : "This module is still a draft. Publish it in AMBA before loading it as a campaign.";
-  $("start-button").disabled = module.publicationStatus !== "published";
+  $("start-button").disabled = true;
   setMessage("");
 }
 
