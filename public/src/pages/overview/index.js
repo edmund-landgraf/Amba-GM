@@ -5,6 +5,7 @@ import { apiGet, apiBaseUrl } from "../../services/amba.js";
 import { openCampaigns } from "../campaigns/index.js";
 import { campaignScope } from "../../domain/campaigns.js";
 import { campaignStore } from "../../services/campaign-store.js";
+import { serverCampaignStore } from "../../services/server-campaign-store.js";
 
 const modulePanel = $("module-panel");
 const overviewPanel = $("overview-panel");
@@ -78,8 +79,10 @@ async function openOverview() {
         if (request !== overviewRequest) return;
         if (snapshot.moduleId !== module.id || !snapshot.revision || !Array.isArray(snapshot.tree) || !snapshot.pages) throw new Error("Invalid published adventure.");
         const scope = campaignScope(new URL(apiBaseUrl, location.href).href, ownerId, module.id);
-        const store = campaignStore(window.indexedDB, scope);
-        await openCampaigns({ snapshot, moduleTitle: module.title, ownerId, store, readerUrl: url.href, exit: () => {
+        const store = serverCampaignStore(ownerId, module.id);
+        let legacyStore;
+        try { legacyStore = campaignStore(window.indexedDB, scope); } catch {}
+        await openCampaigns({ snapshot, moduleTitle: module.title, ownerId, store, legacyStore, readerUrl: url.href, exit: () => {
           overviewPanel.classList.remove("hidden");
           document.querySelector(".intro").hidden = false;
         }, isCurrent: () => request === overviewRequest });
