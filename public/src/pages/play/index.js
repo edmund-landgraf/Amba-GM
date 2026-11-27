@@ -2,6 +2,7 @@ import { element, button } from "../../components/dom.js";
 import { renderPublishedContent } from "./published-content.js";
 import { availableDegrees, degreeLabels, outcomeNarrative } from "../../domain/outcomes.js";
 import { activeSession } from "../../domain/campaigns.js";
+import { collectPlayerCharacters, containsPage, projectStoryActs } from "../../domain/story-tree.js";
 import { renderSessionControls } from "./session-controls.js";
 
 export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exit, readerUrl, mountAfter) {
@@ -45,21 +46,23 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     root.setAttribute("aria-busy", "true");
     refreshControls();
     feedback.textContent = "";
+    let succeeded = false;
     try {
       campaign = await store.change({ id: campaign.id, revision: snapshot.revision, expectedVersion: campaign.version, command });
-      if (after) after();
-      else if (historyView) showHistory();
-      else if (currentId) show(currentId);
-      feedback.textContent = message;
-      return true;
+      succeeded = true;
     } catch (error) {
       feedback.textContent = (error.message || "Campaign update failed.") + " Reopen the campaign to confirm its saved state.";
-      return false;
     } finally {
       busy = false;
       root.removeAttribute("aria-busy");
       refreshControls();
     }
+    if (!succeeded || closed) return false;
+    if (after) after();
+    else if (historyView) showHistory();
+    else if (currentId) show(currentId);
+    feedback.textContent = message;
+    return true;
   }
 
   function renderHistory(log, pageId = null) {
@@ -70,9 +73,9 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
       const source = Object.hasOwn(snapshot.pages, entry.pageId) ? snapshot.pages[entry.pageId] : null;
       const table = source?.challenges?.find(check => check.id === entry.tableId);
       const row = element("section");
-      row.append(element("h4", entry.actor + " · " + entry.table + " · " + entry.label));
+      row.append(element("h4", entry.actor + " � " + entry.table + " � " + entry.label));
       const session = campaign.sessions.find(s => s.id === entry.sessionId);
-      row.append(element("p", "Session " + (session?.number ?? "?") + (pageId ? "" : " · " + (source?.title || "Source page unavailable"))));
+      row.append(element("p", "Session " + (session?.number ?? "?") + (pageId ? "" : " � " + (source?.title || "Source page unavailable"))));
       row.append(element("p", outcomeNarrative(entry, table) || "Authored result text unavailable."));
       row.append(element("small", entry.recordedAt ? "Recorded " + new Date(entry.recordedAt).toLocaleString() : "Original recording time unavailable"));
       if (entry.correctedAt) row.append(element("p", "Corrected " + new Date(entry.correctedAt).toLocaleString()));
@@ -106,9 +109,9 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     if (!campaign.sessions.length) sessions.append(element("p", "No sessions yet."));
     for (const session of campaign.sessions) {
       const count = campaign.outcomes.filter(o => o.sessionId === session.id).length;
-      sessions.append(element("h4", "Session " + session.number + (session.endedAt ? " · Completed" : " · Active")));
+      sessions.append(element("h4", "Session " + session.number + (session.endedAt ? " � Completed" : " � Active")));
       sessions.append(element("p", new Date(session.startedAt).toLocaleString() +
-        (session.endedAt ? " – " + new Date(session.endedAt).toLocaleString() : "") + " · " + count + " accepted outcomes"));
+        (session.endedAt ? " - " + new Date(session.endedAt).toLocaleString() : "") + " � " + count + " accepted outcomes"));
     }
     const log = element("section");
     feedback.textContent = "";
@@ -127,14 +130,14 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     const log = element("section");
     for (const table of data.challenges || []) {
       const block = element("section");
-      block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" · ")));
+      block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" � ")));
       for (const degree of availableDegrees(table)) {
         const accept = button(degreeLabels[degree], () => {
           const session = activeSession(campaign);
           if (!session || busy) return;
           const actor = pcs.get(selectedPc) || "Party";
           void mutate({ type: "accept", sessionId: session.id, key: crypto.randomUUID(), pageId: id, table,
-            pcId: selectedPc || null, actor, degree }, actor + " · " + degreeLabels[degree] + ". " + table.degrees[degree], () => {
+            pcId: selectedPc || null, actor, degree }, actor + " � " + degreeLabels[degree] + ". " + table.degrees[degree], () => {
             selectPc("");
             show(id);
           });
@@ -149,15 +152,8 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     renderHistory(log, id);
   }
 
-  function collectPcs(nodes) {
-    for (const node of nodes) {
-      if (node.kind === "pc" && node.pageId) pcs.set(node.pageId, node.title);
-      if (node.children) collectPcs(node.children);
-    }
-  }
-  collectPcs(snapshot.tree);
+  for (const [id, title] of collectPlayerCharacters(snapshot.tree)) pcs.set(id, title);
 
-  const containsPage = (node, id) => Boolean(id && (node.pageId === id || node.children?.some(child => containsPage(child, id))));
   function tree(nodes, depth) {
     const list = element("ul");
     for (const node of nodes) {
@@ -199,17 +195,7 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     return list;
   }
 
-  const moduleRoot = snapshot.tree.find(node => node.kind === "module");
-  const acts = moduleRoot?.children?.find(node => node.typeKey === "acts");
-  const storyTypes = new Set(["act", "scene", "subscene", "encounter", "folder"]);
-  function storyNodes(nodes) {
-    return nodes.flatMap(node => {
-      if (node.kind !== "narrative" && !(node.kind === "container" && storyTypes.has(node.typeKey))) return [];
-      const children = storyNodes(node.children || []);
-      return node.typeKey === "folder" && !children.length ? [] : [{ ...node, children }];
-    });
-  }
-  const story = storyNodes(acts?.children || []);
+  const story = projectStoryActs(snapshot.tree);
   nav.setAttribute("aria-label", "Story acts");
   nav.append(tree(story, 0));
   const roster = element("fieldset");
@@ -243,3 +229,5 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
   }
   else page.append(element("p", story.length ? "Expand an act to choose a story node." : "This publication has no story acts."));
 }
+
+
