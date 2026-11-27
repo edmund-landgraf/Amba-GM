@@ -16,10 +16,10 @@ This is a starting sequence, not a complete specification. Confirm each contract
 - [ ] Provide stable navigation, readable narrative, and contextual artifacts/references.
 - [ ] Support physical play with button-only roller and degree selection when no provider is connected.
 
-## M2 — Campaign-specific notes and outcomes
+## M2 — Campaign-specific button records and outcomes
 
 - [ ] Define campaign/game identity and isolated runtime storage.
-- [ ] Add quick GM notes linked to stable source nodes.
+- [ ] Add author-defined, button-only event controls linked to stable source nodes; no freeform notes in the live runtime.
 - [ ] Accept a provider-sourced check result with a click on its authored degree pill; use provider roller identity when available, otherwise button-select a PC or default to Party.
 - [ ] Support edit, clear, skip, defer, and correction without treating missing data as “no.”
 - [ ] Show saved state immediately and derive summaries from canonical records.
@@ -44,4 +44,4 @@ This is a starting sequence, not a complete specification. Confirm each contract
 
 - [ ] Decide whether a player experience is needed after GM workflow validation.
 - [ ] Define a safe player projection and explicit reveal controls.
-- [ ] Keep player access optional and separate from GM notes and private campaign records.
+- [ ] Keep player access optional and separate from GM outcome records and private campaign records.
