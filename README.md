@@ -2,7 +2,7 @@
 
 A separate GM-facing runtime for running adventures authored and published in AMBA.
 
-AMBA remains the authoring and publishing system. AMBA GM reads its module list and published content, then keeps campaign-specific notes and outcomes in this app.
+AMBA remains the authoring and publishing system. AMBA GM reads its module list and published content, then keeps button-confirmed campaign outcomes in this app.
 
 ## Current starter
 
@@ -19,7 +19,7 @@ Configure the AMBA API origin in `public/config.js`. Cross-origin session access
 ## Boundaries
 
 - The selected AMBA module remains read-only.
-- Campaign notes and outcomes will be scoped to a GM's campaign.
+- Button-confirmed outcome records will be scoped to a GM's campaign.
 - Foundry, WGUI, Owlbear, and manual play remain optional providers.
 - The initial runtime does not track combat, automate rules, infer events, or run branching logic.
 - Credentials are not collected or stored by this starter.
