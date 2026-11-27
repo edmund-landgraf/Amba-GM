@@ -20,7 +20,7 @@ This is a starting sequence, not a complete specification. Confirm each contract
 
 - [ ] Define campaign/game identity and isolated runtime storage.
 - [ ] Add quick GM notes linked to stable source nodes.
-- [ ] Add explicit capture for author-defined events and checkpoint outcomes when AMBA supplies them.
+- [ ] Record authored challenge results by clicking the rolled degree pill in the challenge card; attribute to the selected PC or default to Party.
 - [ ] Support edit, clear, skip, defer, and correction without treating missing data as “no.”
 - [ ] Show saved state immediately and derive summaries from canonical records.
 
