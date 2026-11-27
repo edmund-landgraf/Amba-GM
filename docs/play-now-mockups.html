@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AMBA Play Now — GM App Mockups</title>
+<style>
+@page{size:13.333in 7.5in;margin:0}
+*{box-sizing:border-box}
+:root{--ink:#192722;--muted:#758079;--forest:#235e4b;--forest2:#e9f2ed;--gold:#c38a35;--line:#dfe6e1;--paper:#f6f8f6;--white:#fff;--blue:#edf3f8;--red:#a74d40}
+html,body{margin:0;background:#e5eae6;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif}
+.slide{width:1280px;height:720px;margin:24px auto;padding:36px 52px 32px;background:#f5f7f5;position:relative;overflow:hidden;page-break-after:always}
+.slide:last-child{page-break-after:auto}
+.headline{height:60px;display:flex;align-items:flex-start;justify-content:space-between}
+.headline h1{font-size:25px;margin:0 0 4px;font-weight:700;letter-spacing:-.3px}
+.headline p{font-size:12px;color:#647169;margin:0}
+.num{font-size:12px;color:#647169;font-weight:700;padding-top:5px}
+.browser{height:552px;margin-top:8px;border:1px solid #cfd8d2;border-radius:12px;background:#eef2ef;box-shadow:0 7px 20px #25372c12;overflow:hidden}
+.appbar{height:48px;background:#20352d;color:#f5faf7;display:flex;align-items:center;padding:0 18px;gap:18px;font-size:11px}
+.brand{font-weight:800;letter-spacing:.8px;color:#fff}
+.apname{font-size:12px;font-weight:600}
+.toplink{color:#cdd8d1}
+.flex{flex:1}
+.pill{border-radius:16px;padding:6px 10px;background:#31493e;color:#dce9e0;font-size:10px}
+.button{background:var(--forest);color:white;border-radius:7px;padding:9px 14px;font-weight:700;font-size:11px;display:inline-block}
+.button.light{background:#fff;color:var(--forest);border:1px solid #adc2b6}
+.button.gold{background:var(--gold);color:#fff}
+.content{padding:20px 22px}
+.split{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:15px}
+.card h3{margin:0 0 6px;font-size:13px}
+.small{font-size:10px;color:var(--muted);line-height:1.45}
+.label{font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:#7b877e;margin-bottom:7px}
+.row{display:flex;align-items:center;gap:10px}
+.module{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--line);border-radius:8px;background:#fff;margin:8px 0}
+.module.selected{border:2px solid var(--forest);background:#f5faf6}
+.thumb{width:34px;height:34px;border-radius:8px;background:#dbe8df;display:grid;place-items:center;color:var(--forest);font-weight:800}
+.dot{width:7px;height:7px;border-radius:50%;background:#4f9b68;display:inline-block;margin-right:5px}
+.rule{height:1px;background:var(--line);margin:13px 0}
+.source{border:1px solid var(--line);border-radius:8px;padding:10px 11px;background:#fff;display:flex;gap:8px;align-items:center}
+.source.active{border:2px solid var(--forest);background:#f3f8f4}
+.sourceicon{width:25px;height:25px;border-radius:6px;background:#eaf1ec;display:grid;place-items:center;color:var(--forest);font-size:10px;font-weight:800}
+.roster{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #edf0ee;padding:9px 0}
+.check{width:14px;height:14px;border:1px solid #8ca596;border-radius:4px;background:#eaf5ed;display:inline-block;text-align:center;color:var(--forest);font-size:10px;line-height:12px}
+.shell{display:grid;grid-template-columns:255px 1fr;height:504px}
+.tree{background:#fff;border-right:1px solid var(--line);padding:12px 10px;overflow:hidden}
+.treetop{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:11px;padding:2px 8px 10px}
+.treeitem{font-size:10px;color:#506058;padding:6px 7px;border-radius:5px;white-space:nowrap}
+.treeitem.indent{padding-left:22px}
+.treeitem.deep{padding-left:38px}
+.treeitem.sel{background:#e8f2ec;color:#174b38;font-weight:700}
+.treeitem.muted{color:#a0aaa4}
+.right{background:#f7f9f7;min-width:0}
+.tabs{height:42px;background:white;border-bottom:1px solid var(--line);display:flex;align-items:stretch;padding:0 15px;gap:4px}
+.tab{font-size:10px;padding:14px 11px 10px;color:#68766e}
+.tab.active{color:var(--forest);font-weight:700;border-bottom:2px solid var(--forest)}
+.nodehead{padding:14px 19px 10px;display:flex;justify-content:space-between;align-items:flex-start}
+.nodehead h2{font-size:17px;margin:0 0 3px}
+.nodebody{padding:0 19px 16px;display:grid;grid-template-columns:1.15fr .85fr;gap:13px}
+.readpanel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px}
+.readpanel h3{font-size:12px;margin:0 0 8px}
+.readpanel p{font-size:10px;color:#47574e;line-height:1.5;margin:7px 0}
+.actionpanel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px}
+.actionpanel h3{font-size:12px;margin:0 0 7px}
+.action{border:1px solid #e4eae6;border-radius:7px;padding:9px;margin:8px 0;background:#fbfcfb}
+.actiontitle{font-size:10px;font-weight:700}
+.result{font-size:9px;padding:4px 7px;background:#edf4ef;border-radius:5px;color:#305d45;display:inline-block;margin:4px 3px 0 0}
+.note{background:#f7f4ec;border-left:3px solid var(--gold);padding:8px 10px;border-radius:4px;font-size:9px;color:#68542e;line-height:1.4}
+.callout{position:absolute;bottom:21px;left:52px;right:52px;display:flex;justify-content:space-between;color:#69766e;font-size:10px}
+.callout strong{color:#34463b}
+.chip{display:inline-block;border:1px solid #dce5df;border-radius:12px;padding:4px 7px;background:#fff;font-size:9px;color:#52645a;margin:2px}
+.timeline{border-left:2px solid #dfe8e1;margin:8px 0 0 6px;padding-left:13px}
+.event{position:relative;padding:2px 0 11px}
+.event:before{content:"";position:absolute;left:-19px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--forest)}
+.event strong{font-size:10px}
+.event p{font-size:9px;color:#66736b;margin:3px 0}
+.place{border:1px solid var(--line);border-radius:7px;padding:9px;margin:7px 0;background:#fff}
+.place strong{font-size:10px}
+.notice{padding:7px 9px;background:#f0f4f1;border-radius:6px;font-size:9px;color:#617067;margin-top:8px}
+@media print{html,body{background:#fff}.slide{margin:0;box-shadow:none;break-after:page}.slide:last-child{break-after:auto}}
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="headline"><div><h1>Choose an adventure to run</h1><p>Play Now opens the latest successful full publication.</p></div><div class="num">01 / START</div></div>
+  <div class="browser">
+    <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="toplink">My games</span><span class="flex"></span><span class="toplink">Help</span><span class="thumb" style="width:26px;height:26px;background:#385748;color:#fff">GM</span></div>
+    <div class="content">
+      <div class="split">
+        <div>
+          <div class="label">Your adventures</div>
+          <h2 style="font-size:19px;margin:0 0 12px">Select a published module</h2>
+          <div class="module selected"><div class="row"><div class="thumb">P</div><div><strong style="font-size:12px">The Price of Prophecy</strong><div class="small">Pathfinder 2e · Owned module</div></div></div><span class="pill" style="background:#e7f1ea;color:#2b644b">Published</span></div>
+          <div class="module"><div class="row"><div class="thumb" style="background:#eee8dc;color:#8b6a36">V</div><div><strong style="font-size:12px">The Lost Mansions of House Vhalek</strong><div class="small">Pathfinder 2e · Owned module</div></div></div><span class="small">Published</span></div>
+          <div class="module"><div class="row"><div class="thumb" style="background:#e7e9f1;color:#5e6485">S</div><div><strong style="font-size:12px">The Shattered Veil</strong><div class="small">Pathfinder 2e · Draft not available</div></div></div><span class="small">Not published</span></div>
+        </div>
+        <div class="card" style="padding:20px">
+          <div class="label">Selected module</div><h2 style="font-size:21px;margin:0 0 6px">The Price of Prophecy</h2>
+          <p class="small">Play from the full published adventure. Play Now uses the last successful syndication; draft edits stay in Authoring until the next publication.</p>
+          <div class="rule"></div>
+          <div class="row"><span class="dot"></span><strong style="font-size:11px">Full syndication ready</strong></div>
+          <p class="small" style="margin:5px 0">Published 26 Nov 2026 · Revision 12</p>
+          <div class="notice">Existing campaign found. Resume keeps its party, notes, outcomes, and session history.</div>
+          <div style="margin-top:18px;display:flex;gap:8px"><span class="button">Resume campaign</span><span class="button light">Start a new game</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><span><strong>Boundary:</strong> Play Now reads published content; it doesn’t open authoring tools.</span><span>GM app mockups · 1 of 5</span></div>
+</section>
+
+<section class="slide">
+  <div class="headline"><div><h1>Choose where the party's PCs come from</h1><p>Import a roster into this campaign without changing the adventure's PC records.</p></div><div class="num">02 / PARTY</div></div>
+  <div class="browser">
+    <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="apname">The Price of Prophecy</span><span class="pill">New campaign setup</span><span class="flex"></span><span class="small" style="color:#cdd8d1">Step 2 of 2</span></div>
+    <div class="content">
+      <div style="display:grid;grid-template-columns:310px 1fr;gap:15px">
+        <div class="card">
+          <div class="label">Character source</div>
+          <div class="source"><div class="sourceicon">W</div><div><strong style="font-size:11px">Wanderer's Guide</strong><div class="small">Choose a campaign roster</div></div></div>
+          <div class="source" style="margin-top:7px"><div class="sourceicon">F</div><div><strong style="font-size:11px">Foundry</strong><div class="small">Choose a world and player actors</div></div></div>
+          <div class="source active" style="margin-top:7px"><div class="sourceicon">A</div><div><strong style="font-size:11px">AMBA pregens</strong><div class="small">Use characters published with this AP</div></div></div>
+          <div class="notice">No live character sheets are copied into the authoring module.</div>
+        </div>
+        <div class="card" style="padding:16px 19px">
+          <div class="row" style="justify-content:space-between"><div><div class="label">AMBA pregenerated PCs</div><h2 style="font-size:17px;margin:0">Select the party</h2></div><span class="chip">5 available</span></div>
+          <p class="small">These are pregens from the published adventure. Select the characters this group will play.</p>
+          <div class="roster"><div class="row"><span class="check">✓</span><strong style="font-size:10px">Pregen — Fighter</strong><span class="small">Level 1</span></div><span class="small">PF2e</span></div>
+          <div class="roster"><div class="row"><span class="check">✓</span><strong style="font-size:10px">Pregen — Cleric</strong><span class="small">Level 1</span></div><span class="small">PF2e</span></div>
+          <div class="roster"><div class="row"><span class="check">✓</span><strong style="font-size:10px">Pregen — Rogue</strong><span class="small">Level 1</span></div><span class="small">PF2e</span></div>
+          <div class="roster"><div class="row"><span class="check" style="background:white"> </span><strong style="font-size:10px;color:#78847c">Pregen — Ranger</strong><span class="small">Level 1</span></div><span class="small">PF2e</span></div>
+          <div class="roster"><div class="row"><span class="check" style="background:white"> </span><strong style="font-size:10px;color:#78847c">Pregen — Wizard</strong><span class="small">Level 1</span></div><span class="small">PF2e</span></div>
+          <div class="rule"></div>
+          <div class="row" style="justify-content:space-between"><span class="small">3 PCs selected · You can change the roster later.</span><span class="button">Import 3 PCs to campaign</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><span><strong>Party source:</strong> WGUI campaign · Foundry world · AMBA pregen roster.</span><span>GM app mockups · 2 of 5</span></div>
+</section>
+
+<section class="slide">
+  <div class="headline"><div><h1>The GM workspace keeps the adventure tree</h1><p>Select a scene, subscene, or encounter. The right side shows the Play Now view for that published node.</p></div><div class="num">03 / WORKSPACE</div></div>
+  <div class="browser">
+    <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="apname">The Price of Prophecy</span><span class="pill">Full publication · v12</span><span class="flex"></span><span class="toplink">Search</span><span class="button gold">Quick note</span><span class="pill">Session active</span></div>
+    <div class="shell">
+      <div class="tree"><div class="treetop"><span>ADVENTURE</span><span class="small">⌕</span></div>
+        <div class="treeitem sel">Act 1 — Investigating Reiver's Right</div>
+        <div class="treeitem indent">Scene 1 — Old Macridi</div>
+        <div class="treeitem deep">Sella Varn's Tavern</div>
+        <div class="treeitem deep">Assembly Institute</div>
+        <div class="treeitem indent sel">Scene 2 — Reiver's Right</div>
+        <div class="treeitem deep sel">E15 — Watchtower</div>
+        <div class="treeitem deep">E17 — North Track</div>
+        <div class="treeitem indent">Lower Works</div>
+        <div class="treeitem deep">E18 — The Lower Works</div>
+        <div class="rule"></div>
+        <div class="treeitem">Act 2 — Kerse</div><div class="treeitem">Act 3 — The Cedar Court</div><div class="treeitem">Act 4 — Endless Revelry</div><div class="treeitem muted">Acts 5–10</div>
+      </div>
+      <div class="right">
+        <div class="tabs"><span class="tab active">Run</span><span class="tab">Campaign</span><span class="tab">History</span><span class="flex"></span><span class="tab">AMBA pregen party · 3 PCs</span></div>
+        <div class="nodehead"><div><div class="label">Scene 2 · Reiver's Right</div><h2>E15 — Watchtower</h2><div class="small">Published encounter · source content unchanged</div></div><span class="chip">GM view</span></div>
+        <div class="nodebody">
+          <div class="readpanel"><h3>At a glance</h3><p>The watchtower gives a view across the sawyard, log stacks, hoist, and North Track. Use the authored observation table for unusual details.</p><div class="rule"></div><div class="label">Published material</div><span class="chip">Narrative</span><span class="chip">2 challenges</span><span class="chip">Map reference</span><div class="notice">Panels appear from content in the published node. No editing or authoring controls are included.</div></div>
+          <div class="actionpanel"><h3>Campaign context</h3><div class="small">No Storylines or Clues are required.</div><div class="rule"></div><div class="action"><div class="actiontitle">Latest note</div><div class="small">No campaign records for this node yet.</div></div><div class="button light">Open campaign history</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><span><strong>Three panes:</strong> top controls · left tree · tabbed node workspace.</span><span>GM app mockups · 3 of 5</span></div>
+</section>
+
+<section class="slide">
+  <div class="headline"><div><h1>Challenge results record directly from the authored table</h1><p>Select who rolled, then click the degree that actually came up. No separate recording panel.</p></div><div class="num">04 / ENCOUNTER</div></div>
+  <div class="browser">
+    <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="apname">The Price of Prophecy</span><span class="pill">Published · v12</span><span class="flex"></span><span class="toplink">Search</span><span class="button gold">Quick note</span><span class="pill">Session active</span></div>
+    <div class="shell">
+      <div class="tree"><div class="treetop"><span>ADVENTURE</span><span class="small">⌕</span></div>
+        <div class="treeitem">Act 1 — Investigating Reiver's Right</div><div class="treeitem indent">Scene 2 — Reiver's Right</div><div class="treeitem deep sel">E15 — Watchtower</div><div class="treeitem deep">E17 — North Track</div><div class="treeitem indent">Lower Works</div><div class="treeitem deep">E18 — The Lower Works</div><div class="rule"></div><div class="treeitem">Act 2 — Kerse</div><div class="treeitem">Act 3 — The Cedar Court</div><div class="treeitem">Act 4 — Endless Revelry</div>
+      </div>
+      <div class="right">
+        <div class="tabs"><span class="tab active">Run</span><span class="tab">Challenges</span><span class="tab">Campaign</span><span class="tab">History</span><span class="flex"></span><span class="tab">E15 selected</span></div>
+        <div class="nodehead"><div><div class="label">Scene 2 · Reiver's Right</div><h2>E15 — Watchtower</h2></div><span class="chip">Generated from v12</span></div>
+        <div class="nodebody" style="grid-template-columns:.62fr 1.38fr">
+          <div class="actionpanel"><h3>Who rolled?</h3><p class="small">Choose a PC to attach the result to that character. Leave everyone unselected for a party roll.</p>
+            <div class="source active"><div class="sourceicon">P</div><div><strong style="font-size:11px">Party roll</strong><div class="small">Default when no PC is selected</div></div></div>
+            <div class="source" style="margin-top:7px"><div class="sourceicon">1</div><div><strong style="font-size:11px">Ulysses</strong><div class="small">PC</div></div></div>
+            <div class="source" style="margin-top:7px"><div class="sourceicon">2</div><div><strong style="font-size:11px">Kota</strong><div class="small">PC</div></div></div>
+            <div class="source" style="margin-top:7px"><div class="sourceicon">3</div><div><strong style="font-size:11px">Malkus</strong><div class="small">PC</div></div></div>
+            <div class="source" style="margin-top:7px"><div class="sourceicon">4</div><div><strong style="font-size:11px">Skye</strong><div class="small">PC</div></div></div>
+            <div class="source" style="margin-top:7px"><div class="sourceicon">5</div><div><strong style="font-size:11px">Doku</strong><div class="small">PC</div></div></div>
+          </div>
+          <div class="readpanel"><h3>Published challenge</h3>
+            <div class="action"><div class="actiontitle">Perception · DC 16 · Northeastern clearings</div><p>Success: identify disturbed clearings; gain the authored bonus to the first Survival check along the route.</p>
+              <div style="margin-top:9px"><span class="result">Critical success</span><span class="result" style="background:#235e4b;color:#fff">Success · recorded</span><span class="result">Failure</span><span class="result">Critical failure</span></div>
+              <p class="small" style="margin:10px 0 0">Click the result the table rolled. AMBA GM saves the degree, selected roller, and authored outcome text together.</p>
+            </div>
+            <div class="notice">Party roll · Perception DC 16 · Success. Saved to campaign history. Click another degree to correct the record.</div>
+            <p class="small">The full source narrative and challenge table stay available in context. Rolls can come from Foundry, Wanderer's Guide, AMBA, or manual play.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><span><strong>One recording action:</strong> choose a PC or leave the party default, then click the rolled result.</span><span>GM app mockups · 4 of 5</span></div>
+</section>
+
+<section class="slide">
+  <div class="headline"><div><h1>Campaign history and location views share the same source</h1><p>Storylines and Clues add context when present; the tree and recorded history work without them.</p></div><div class="num">05 / CAMPAIGN</div></div>
+  <div class="browser">
+    <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="apname">The Price of Prophecy</span><span class="pill">Published · v12</span><span class="flex"></span><span class="toplink">Search</span><span class="button gold">Quick note</span><span class="pill">Session active</span></div>
+    <div class="shell">
+      <div class="tree"><div class="treetop"><span>ADVENTURE</span><span class="small">⌕</span></div>
+        <div class="treeitem">Act 1 — Investigating Reiver's Right</div><div class="treeitem indent">Scene 2 — Reiver's Right</div><div class="treeitem deep sel">E15 — Watchtower</div><div class="treeitem deep">E17 — North Track</div><div class="treeitem indent">Lower Works</div><div class="treeitem deep">E18 — The Lower Works</div><div class="rule"></div><div class="treeitem">Act 2 — Kerse</div>
+      </div>
+      <div class="right">
+        <div class="tabs"><span class="tab">Run</span><span class="tab active">Campaign</span><span class="tab">History</span><span class="flex"></span><span class="tab">Campaign records · 4</span></div>
+        <div class="nodehead"><div><div class="label">Campaign view · same published node IDs</div><h2>Locations and game history</h2></div><span class="chip">GM-only records</span></div>
+        <div class="nodebody">
+          <div class="readpanel"><div class="row" style="justify-content:space-between"><h3>Reiver's Right</h3><span class="chip">Location</span></div><p class="small">Published material connected to this place, grouped for quick reference. Each card opens its original tree node.</p><div class="place"><strong>E15 — Watchtower</strong><div class="small">Scene 2 · Observation checks · 1 recorded discovery</div></div><div class="place"><strong>E17 — North Track</strong><div class="small">Scene 2 · Route narrative · No campaign record yet</div></div><div class="place"><strong>Lower Works</strong><div class="small">Sub-location · E18 and published references</div></div><div class="notice">Location view reorganizes navigation only; it does not move or copy adventure nodes.</div></div>
+          <div class="actionpanel"><h3>Recent campaign history</h3><div class="timeline"><div class="event"><strong>E15 · Trail identified</strong><p>Perception DC 16 · Success · Saved by GM</p></div><div class="event"><strong>Sella's Tavern · Cargo disclosed</strong><p>GM note · Linked to original scene</p></div><div class="event"><strong>Party roster imported</strong><p>AMBA pregens · 3 PCs</p></div></div><div class="rule"></div><div class="label">Optional published context</div><span class="chip">Storylines · 2</span><span class="chip">Clues · 5</span><div class="small">If none are published, these filters disappear; tree, search, notes, and history remain.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><span><strong>Same content, added play layer:</strong> campaign records attach to stable published nodes.</span><span>GM app mockups · 5 of 5</span></div>
+</section>
+</body>
+</html>
