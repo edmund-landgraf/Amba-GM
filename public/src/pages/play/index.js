@@ -46,21 +46,23 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     root.setAttribute("aria-busy", "true");
     refreshControls();
     feedback.textContent = "";
+    let succeeded = false;
     try {
       campaign = await store.change({ id: campaign.id, revision: snapshot.revision, expectedVersion: campaign.version, command });
-      if (after) after();
-      else if (historyView) showHistory();
-      else if (currentId) show(currentId);
-      feedback.textContent = message;
-      return true;
+      succeeded = true;
     } catch (error) {
       feedback.textContent = error.message || "Campaign update failed. Nothing was recorded.";
-      return false;
     } finally {
       busy = false;
       root.removeAttribute("aria-busy");
       refreshControls();
     }
+    if (!succeeded || closed) return false;
+    if (after) after();
+    else if (historyView) showHistory();
+    else if (currentId) show(currentId);
+    feedback.textContent = message;
+    return true;
   }
 
   function renderHistory(log, pageId = null) {
