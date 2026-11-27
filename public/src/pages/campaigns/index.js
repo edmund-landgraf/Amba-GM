@@ -14,7 +14,7 @@ function downloadJson(value, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, readerUrl, exit, isCurrent }) {
+export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, localStore, readerUrl, exit, isCurrent }) {
   const root = element("section");
   root.className = "panel";
   const status = element("p");
@@ -85,7 +85,7 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, rea
     }
   }
   root.append(back, element("h2", moduleTitle + " — Campaigns"),
-    element("p", "Campaigns are saved in this browser profile. They are not synchronized to a server or another device. Exports contain GM-private history."),
+    element("p", "Campaigns are saved on the AMBA server for this signed-in account and adventure. Exports contain GM-private history."),
     status, name, create, list);
   // Do not silently assign the predecessor's revision-scoped tab history to any new game.
   try {
@@ -95,6 +95,31 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, rea
         button("Export previous tab outcomes", () => downloadJson({ moduleId: snapshot.moduleId, revision: snapshot.revision, outcomes: legacy.records }, "amba-gm-previous-tab-outcomes.json")));
     }
   } catch { /* no legacy storage access */ }
-  await refresh();
+  // Browser campaigns remain intact and can be exported explicitly; never upload or
+  // delete legacy records automatically, and never fall back to local writes.
+  if (localStore) {
+    try {
+      const local = await localStore.list();
+      if (local.length) {
+        const legacy = element("section");
+        legacy.append(element("h3", "Previous browser-only campaigns"),
+          element("p", "These records are still saved in this browser, but are not synchronized. Export them for safekeeping. Server migration of these records is not yet supported."));
+        for (const campaign of local) {
+          legacy.append(element("p", campaign.name + " · " + campaign.sessions.length + " sessions"),
+            button("Export local campaign " + campaign.name, () => downloadJson({
+              schemaVersion: 1, moduleId: snapshot.moduleId, campaign,
+            }, "amba-gm-local-" + campaign.id + ".json")));
+        }
+        root.append(legacy);
+      }
+    } catch {
+      root.append(element("p", "Previous browser-only campaigns could not be read; no local records were changed."));
+    }
+  }
+  // Mount even when the server is unavailable, so legacy exports remain reachable.
+  const retry = button("Refresh server campaigns", () => void run(refresh));
+  root.append(retry);
+  try { await refresh(); }
+  catch (error) { status.textContent = error.message || "Campaign server unavailable."; }
   if (isCurrent()) document.getElementById("overview-panel").after(root);
 }

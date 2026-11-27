@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
+import { newCampaign, changeCampaign } from "../public/src/domain/campaigns.js";
 
 const origin = "http://127.0.0.1:3010";
 const moduleId = "module-smoke";
@@ -37,9 +38,13 @@ try {
   }
   assert.ok(listening, "local GM server started");
   browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+  let context = await browser.newContext();
+  let page = await context.newPage();
+  let owner = "gm-smoke";
+  let unavailable = false;
+  const records = new Map();
   const errors = [];
+  async function wireContext() {
   page.on("pageerror", error => errors.push(error.message));
   page.on("dialog", dialog => dialog.accept());
   await context.route("**/config.js", route => route.fulfill({
@@ -47,9 +52,41 @@ try {
     body: 'window.AMBA_GM_CONFIG = ' + JSON.stringify({ apiBaseUrl: origin + "/api/v1", appUrl: origin }) + ';'
   }));
   await context.route("**/api/v1/**", async route => {
-    const path = new URL(route.request().url()).pathname;
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const campaignPath = "/api/v1/modules/" + moduleId + "/gm-campaigns";
+    if (path === campaignPath || path.startsWith(campaignPath + "/")) {
+      if (unavailable) return route.fulfill({ status: 503, json: { error: "Campaign server unavailable." } });
+      if (request.headers()["x-amba-gm-owner"] !== owner) return route.fulfill({ status: 409, json: { error: "Account changed." } });
+      const scoped = records.get(owner) || [];
+      if (request.method() === "GET" && path === campaignPath) return route.fulfill({ json: scoped });
+      assert.equal(request.method(), "POST");
+      assert.equal(request.headers()["x-amba-gm-request"], "1");
+      const body = request.postDataJSON();
+      const now = new Date().toISOString();
+      try {
+        let result;
+        if (path === campaignPath) {
+          assert.deepEqual(Object.keys(body).sort(), ["id", "name", "revision"]);
+          result = newCampaign(scoped, { ...body, now });
+        } else {
+          assert.deepEqual(Object.keys(body).sort(), ["command", "expectedVersion", "revision"]);
+          const command = { ...body.command };
+          assert.equal(Object.hasOwn(command, "actor"), false);
+          assert.equal(Object.hasOwn(command, "table"), false);
+          if (command.type === "accept" || command.type === "correct") {
+            command.table = snapshot.pages[command.pageId]?.challenges.find(t => t.id === command.tableId);
+            if (!command.table) throw new Error("Unknown published check");
+            if (command.type === "accept") command.actor = command.pcId === "pc1" ? "Kota" : "Party";
+          }
+          result = changeCampaign(scoped, { ...body, id: decodeURIComponent(path.split("/").at(-2)), command, now });
+        }
+        records.set(owner, result.campaigns);
+        return route.fulfill({ json: result.campaign });
+      } catch (error) { return route.fulfill({ status: 409, json: { error: error.message } }); }
+    }
     const responses = {
-      "/api/v1/auth/me": { user: { id: "gm-smoke" } },
+      "/api/v1/auth/me": { user: { id: owner } },
       "/api/v1/modules": [{ id: moduleId, title: "Smoke adventure", publicationStatus: "published" }],
       ["/api/v1/modules/" + moduleId + "/syndication"]: { syndications: { full: { url: origin + "/syndicate/smoke", publishedPageIds: Object.keys(snapshot.pages) } } },
       ["/api/v1/modules/" + moduleId + "/syndication/gm"]: snapshot
@@ -57,6 +94,8 @@ try {
     if (!Object.hasOwn(responses, path)) return route.fulfill({ status: 404, json: {} });
     return route.fulfill({ json: responses[path] });
   });
+  }
+  await wireContext();
   const button = name => page.getByRole("button", { name, exact: true });
   const visible = async locator => locator.waitFor({ state: "visible", timeout: 10000 });
   async function chooseModule() {
@@ -80,6 +119,12 @@ try {
   await visible(page.getByRole("heading", { name: "Kota · Shrine check · Success", exact: true }));
   console.log("PASS: campaign creation, session start, navigation and accepted outcome");
 
+  // A fresh browser context has neither sessionStorage nor IndexedDB from the
+  // first context. Resumption must be through the server API.
+  await context.close();
+  context = await browser.newContext();
+  page = await context.newPage();
+  await wireContext();
   await chooseModule();
   await button("Resume session 1").click();
   await visible(page.getByRole("heading", { name: "Shrine encounter", exact: true }));
@@ -93,7 +138,7 @@ try {
   await visible(page.getByRole("heading", { name: "Kota · Shrine check · Failure", exact: true }));
   await button("Start session 2").click();
   await visible(button("End session 2"));
-  console.log("PASS: reload, resume, completed history correction and next session");
+  console.log("PASS: fresh browser context resumes server history, correction and next session");
 
   await button("Back to campaigns").click();
   await page.getByRole("textbox", { name: "New campaign name" }).fill("Second table");
@@ -117,8 +162,27 @@ try {
     return { statuses: results.map(r => r.status).sort(), count: rows[0].sessions.length };
   });
   assert.deepEqual(concurrent, { statuses: ["fulfilled", "rejected"], count: 1 });
+  console.log("PASS: legacy IndexedDB transaction regression");
+
+  await context.close();
+  context = await browser.newContext();
+  page = await context.newPage();
+  owner = "gm-other";
+  await wireContext();
+  await chooseModule();
+  await visible(page.getByText("No campaigns yet. Create one for this publication.", { exact: true }));
+  assert.equal(await page.getByText("First table", { exact: true }).count(), 0);
+  unavailable = true;
+  await button("Create campaign").click();
+  await visible(page.getByText("Campaign server unavailable.", { exact: true }));
+  assert.equal(records.has("gm-other"), false);
+  assert.deepEqual(await page.evaluate(async () => {
+    const { campaignStore } = await import("/src/services/campaign-store.js");
+    const { campaignScope } = await import("/src/domain/campaigns.js");
+    return campaignStore(indexedDB, campaignScope(location.origin + "/api/v1", "gm-other", "module-smoke")).list();
+  }), []);
   assert.deepEqual(errors, []);
-  console.log("PASS: actual IndexedDB transactions reject stale concurrent writes; no uncaught page errors");
+  console.log("PASS: account isolation and unavailable server never fall back to local writes; no uncaught page errors");
 } finally {
   if (browser) await browser.close();
   server.kill();
