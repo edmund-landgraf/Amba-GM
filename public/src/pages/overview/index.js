@@ -2,7 +2,9 @@ import { $ } from "../../components/dom.js";
 import { setMessage } from "../../components/status.js";
 import { state } from "../../application/session.js";
 import { apiGet, apiBaseUrl } from "../../services/amba.js";
-import { openWorkspace } from "../play/index.js";
+import { openCampaigns } from "../campaigns/index.js";
+import { campaignScope } from "../../domain/campaigns.js";
+import { campaignStore } from "../../services/campaign-store.js";
 
 const modulePanel = $("module-panel");
 const overviewPanel = $("overview-panel");
@@ -46,7 +48,7 @@ async function openOverview() {
   const open = $("start-button");
   open.disabled = true;
   open.onclick = null;
-  open.textContent = "Open GM workspace";
+  open.textContent = "Manage campaigns";
   open.removeAttribute("title");
   note.textContent = "Checking the published adventure…";
   setMessage("");
@@ -68,12 +70,20 @@ async function openOverview() {
       open.disabled = true;
       note.textContent = "Loading the published tree…";
       try {
+        const identity = user => user?.user?.id || user?.id;
+        const ownerId = identity(state.user);
+        if (!ownerId || identity(await apiGet("/auth/me")) !== ownerId) throw new Error("AMBA account changed. Reconnect before opening campaigns.");
         const snapshot = await apiGet(`/modules/${encodeURIComponent(module.id)}/syndication/gm`);
+        if (identity(await apiGet("/auth/me")) !== ownerId) throw new Error("AMBA account changed. Reconnect before opening campaigns.");
         if (request !== overviewRequest) return;
-        openWorkspace(snapshot, module.title, state.user?.user?.id || state.user?.id, () => {
+        if (snapshot.moduleId !== module.id || !snapshot.revision || !Array.isArray(snapshot.tree) || !snapshot.pages) throw new Error("Invalid published adventure.");
+        const scope = campaignScope(new URL(apiBaseUrl, location.href).href, ownerId, module.id);
+        const store = campaignStore(window.indexedDB, scope);
+        await openCampaigns({ snapshot, moduleTitle: module.title, ownerId, store, readerUrl: url.href, exit: () => {
           overviewPanel.classList.remove("hidden");
           document.querySelector(".intro").hidden = false;
-        }, url.href);
+        }, isCurrent: () => request === overviewRequest });
+        if (request !== overviewRequest) return;
         overviewPanel.classList.add("hidden");
         document.querySelector(".intro").hidden = true;
         note.textContent = "Full publication ready.";
