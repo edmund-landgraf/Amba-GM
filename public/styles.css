@@ -62,3 +62,14 @@ footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line);
   .panel-actions .button { width: 100%; }
   .overview-heading { flex-direction: column; }
 }
+
+.gm-layout { display:grid; grid-template-columns:minmax(220px,32%) minmax(0,1fr); gap:1rem }
+.gm-layout aside,.gm-layout article { padding:1rem; background:white; border-radius:.5rem; min-width:0 }
+.gm-layout nav { max-height:70vh; overflow:auto }
+.gm-layout ul { list-style:none; padding-left:.85rem }
+.gm-layout summary { cursor:pointer }
+.gm-layout button { cursor:pointer; margin:.15rem; padding:.35rem .55rem }
+.gm-layout nav button { border:0; background:transparent; color:inherit; text-align:left }
+.gm-layout [aria-current=page],.gm-layout [aria-pressed=true] { background:#205b46; color:white }
+.gm-layout iframe { width:100%; min-height:36vh; border:0 }
+@media(max-width:720px){.gm-layout{grid-template-columns:1fr}.gm-layout nav{max-height:32vh}}
