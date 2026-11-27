@@ -170,7 +170,7 @@ html,body{margin:0;background:#e5eae6;color:var(--ink);font-family:Inter,"Segoe 
 </section>
 
 <section class="slide">
-  <div class="headline"><div><h1>Challenge results record directly from the authored table</h1><p>Select who rolled, then click the degree that actually came up. No separate recording panel.</p></div><div class="num">04 / ENCOUNTER</div></div>
+  <div class="headline"><div><h1>The provider supplies the roll; AMBA records the outcome</h1><p>Review the received roller, then click the matching degree in the authored challenge.</p></div><div class="num">04 / ENCOUNTER</div></div>
   <div class="browser">
     <div class="appbar"><span class="brand">AMBA PLAY NOW</span><span class="apname">The Price of Prophecy</span><span class="pill">Published · v12</span><span class="flex"></span><span class="toplink">Search</span><span class="button gold">Quick note</span><span class="pill">Session active</span></div>
     <div class="shell">
@@ -181,27 +181,30 @@ html,body{margin:0;background:#e5eae6;color:var(--ink);font-family:Inter,"Segoe 
         <div class="tabs"><span class="tab active">Run</span><span class="tab">Challenges</span><span class="tab">Campaign</span><span class="tab">History</span><span class="flex"></span><span class="tab">E15 selected</span></div>
         <div class="nodehead"><div><div class="label">Scene 2 · Reiver's Right</div><h2>E15 — Watchtower</h2></div><span class="chip">Generated from v12</span></div>
         <div class="nodebody" style="grid-template-columns:.62fr 1.38fr">
-          <div class="actionpanel"><h3>Who rolled?</h3><p class="small">Choose a PC to attach the result to that character. Leave everyone unselected for a party roll.</p>
-            <div class="source active"><div class="sourceicon">P</div><div><strong style="font-size:11px">Party roll</strong><div class="small">Default when no PC is selected</div></div></div>
-            <div class="source" style="margin-top:7px"><div class="sourceicon">1</div><div><strong style="font-size:11px">Ulysses</strong><div class="small">PC</div></div></div>
+          <div class="actionpanel"><h3>Roll attribution</h3><div class="label" style="margin-top:12px">Wanderer's Guide dice log</div>
+            <div class="source active"><div class="sourceicon">W</div><div><strong style="font-size:11px">Kota · Perception</strong><div class="small">Roll received for this check</div></div></div>
+            <div class="rule"></div><div class="small">The provider identifies the roller. If no roller arrives, choose a PC below. Leave all PCs unselected to record a Party roll.</div>
+            <div class="source" style="margin-top:9px"><div class="sourceicon">1</div><div><strong style="font-size:11px">Ulysses</strong><div class="small">PC</div></div></div>
             <div class="source" style="margin-top:7px"><div class="sourceicon">2</div><div><strong style="font-size:11px">Kota</strong><div class="small">PC</div></div></div>
             <div class="source" style="margin-top:7px"><div class="sourceicon">3</div><div><strong style="font-size:11px">Malkus</strong><div class="small">PC</div></div></div>
             <div class="source" style="margin-top:7px"><div class="sourceicon">4</div><div><strong style="font-size:11px">Skye</strong><div class="small">PC</div></div></div>
             <div class="source" style="margin-top:7px"><div class="sourceicon">5</div><div><strong style="font-size:11px">Doku</strong><div class="small">PC</div></div></div>
+            <div class="notice">Foundry roll-log and actor attribution behavior still needs verification.</div>
           </div>
           <div class="readpanel"><h3>Published challenge</h3>
-            <div class="action"><div class="actiontitle">Perception · DC 16 · Northeastern clearings</div><p>Success: identify disturbed clearings; gain the authored bonus to the first Survival check along the route.</p>
-              <div style="margin-top:9px"><span class="result">Critical success</span><span class="result" style="background:#235e4b;color:#fff">Success · recorded</span><span class="result">Failure</span><span class="result">Critical failure</span></div>
-              <p class="small" style="margin:10px 0 0">Click the result the table rolled. AMBA GM saves the degree, selected roller, and authored outcome text together.</p>
+            <div class="action"><div class="actiontitle">Perception · DC 16 · Northeastern clearings</div>
+              <p>The received degree appears here. Click its authored result pill to record the narrative outcome.</p>
+              <div style="margin-top:9px"><span class="result">Critical success</span><span class="result" style="background:#235e4b;color:#fff">Success · received</span><span class="result">Failure</span><span class="result">Critical failure</span></div>
+              <p class="small" style="margin:10px 0 0">Success: identify disturbed clearings; gain the authored bonus to the first Survival check along the route.</p>
             </div>
-            <div class="notice">Party roll · Perception DC 16 · Success. Saved to campaign history. A new attempt makes its own record. Edit or remove a mistaken entry in History.</div>
-            <p class="small">The full source narrative and challenge table stay available in context. Rolls can come from Foundry, Wanderer's Guide, AMBA, or manual play.</p>
+            <div class="notice">Recorded: Kota · Perception DC 16 · Success. The authored text stays visible for the GM to apply in the game system.</div>
+            <p class="small">AMBA GM stores the outcome fact and roller attribution. Foundry or Wanderer's Guide handles damage, conditions, and other mechanics.</p>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="callout"><span><strong>One recording action:</strong> choose a PC or leave the party default, then click the rolled result.</span><span>GM app mockups · 4 of 5</span></div>
+  <div class="callout"><span><strong>Strict boundary:</strong> no in-app rolls, typed results, damage tracking, or combat transcript.</span><span>GM app mockups · 4 of 5</span></div>
 </section>
 
 <section class="slide">
