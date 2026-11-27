@@ -1,3 +1,4 @@
+import { openWorkspace } from "./workspace.js";
 const config = window.AMBA_GM_CONFIG || {};
 const apiBaseUrl = String(config.apiBaseUrl || "/api/v1").replace(/\/$/, "");
 const appUrl = String(config.appUrl || apiBaseUrl.replace(/\/api\/v1$/, "")).replace(/\/$/, "");
@@ -131,7 +132,8 @@ async function openOverview() {
   const open = $("start-button");
   open.disabled = true;
   open.onclick = null;
-  open.textContent = "Open full syndication";
+  open.textContent = "Open GM workspace";
+  open.removeAttribute("title");
   note.textContent = "Checking the published adventure…";
   setMessage("");
   try {
@@ -148,7 +150,25 @@ async function openOverview() {
     }
     if (Array.isArray(full.publishedPageIds)) appendFact(facts, "Published pages", full.publishedPageIds.length);
     note.textContent = status.unreleasedChanges ? "The full publication is ready. AMBA has newer unpublished edits." : "The full publication is ready.";
-    open.onclick = () => location.assign(url.href);
+    open.onclick = async () => {
+      open.disabled = true;
+      note.textContent = "Loading the published tree…";
+      try {
+        const snapshot = await apiGet(`/modules/${encodeURIComponent(module.id)}/syndication/gm`);
+        if (request !== overviewRequest) return;
+        openWorkspace(snapshot, module.title, state.user?.user?.id || state.user?.id, () => {
+          overviewPanel.classList.remove("hidden");
+          document.querySelector(".intro").hidden = false;
+        });
+        overviewPanel.classList.add("hidden");
+        document.querySelector(".intro").hidden = true;
+        note.textContent = "Full publication ready.";
+      } catch (error) {
+        if (request === overviewRequest) note.textContent = "Could not open the published tree. " + error.message;
+      } finally {
+        if (request === overviewRequest) open.disabled = false;
+      }
+    };
     open.disabled = false;
   } catch (error) {
     if (request === overviewRequest) note.textContent = error.message || "Could not load the full syndication.";
