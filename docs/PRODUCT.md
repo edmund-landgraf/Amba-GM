@@ -2,7 +2,7 @@
 
 ## Purpose
 
-AMBA GM is the separate Play Now runtime for GMs running adventures authored and published with AMBA. It provides a usable live reference surface and stores accepted campaign-specific notes and outcomes without changing the published source.
+AMBA GM is the separate Play Now runtime for GMs running adventures authored and published with AMBA. It provides a usable live reference surface and stores button-confirmed campaign outcomes without changing the published source.
 
 ## System responsibilities
 
@@ -15,13 +15,14 @@ AMBA GM is the separate Play Now runtime for GMs running adventures authored and
 - Owner-authenticated GM runtime.
 - Select and open an available published adventure snapshot.
 - Navigate the adventure and access relevant narrative, artifacts, maps, NPCs, PCs, and references.
-- Record concise GM-confirmed notes and author-defined consequential outcomes. Accept check outcomes by button from provider logs or button-only PC/Party and degree selection.
+- Record author-defined event and check outcomes through buttons. Provider logs can supply roller/result; button-only PC or Party and degree selection remains the fallback.
+- Keep the live runtime free of text-entry fields; AMBA authoring defines the available capture buttons.
 - Correct or remove records and retrieve them later in context.
 - Keep GM notes and outcomes private unless the GM explicitly chooses otherwise.
 
 ## Out of scope initially
 
-- In-app dice rolling, typed roll results, or raw dice-log transcript storage.
+- In-app dice rolling, typed results, freeform note fields, or raw dice-log transcript storage.
 - Combat transcript ingestion, storage, or archival.
 - Initiative, HP, conditions, targeting, damage, ongoing poison tracking, or rules automation.
 - Automatic story progression, inferred events, branching conditions, or automatic rewards.
