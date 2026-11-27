@@ -1,30 +1,43 @@
 # GM roll attribution and outcome capture
 
+## Product boundary
+
+AMBA GM never rolls dice and has no text entry for roll results. The game system resolves the check and tracks its mechanical effects. AMBA GM records only the narrative fact that a check occurred, who made it, and which authored degree of success applied.
+
+For example, the GM may see a DC 18 check and its authored critical failure text. The GM handles any poison damage or condition in Foundry, Wanderer's Guide, or at the table. AMBA GM does not track damage, conditions, initiative, rounds, recovery, or combat logs.
+
 ## Interaction
 
-The live GM workspace keeps the adventure tree on the far left. In the selected encounter, show the party roster in a compact left-side pane beside the authored content. Do not reserve a right-side panel for recording outcomes.
+The live GM workspace keeps the adventure tree on the far left. A compact party roster sits to the left of the authored encounter content. There is no separate right-side outcome panel.
 
-For a published challenge, the degree-of-success pills remain in the authored challenge card. The GM selects the PC who rolled, then clicks the result that actually occurred. That click records the challenge result and attaches the corresponding authored outcome text to the campaign record. There is no second Save button or separate result panel.
+The currently active authored check shows its DC and degree-of-success pills in the challenge card. A connected provider can supply the roller and degree. AMBA GM displays that roll context and lets the GM confirm the matching result by clicking its pill. The click records the campaign fact and associates the authored outcome text. There is no separate Save button.
 
-## Roller attribution
+If the provider does not supply a roller identity, the GM can choose a PC with a roster button before clicking the result. If no PC is selected, attribution defaults to **Party**. Nothing is typed.
 
-The roster source follows the GM's party setup: Wanderer's Guide, Foundry, or AMBA pregenerated PCs. The selected PC is visibly highlighted.
+## Provider behavior
 
-If no PC is selected, attribute the roll to **Party**. Party is the default state. The GM can change the selected PC before recording another result.
+- **Wanderer's Guide:** use its dice log to identify the roller and result where the existing interface/API exposes them. Use the log as input to the current AMBA GM check; keep only the accepted narrative result needed by the campaign.
+- **Foundry:** determine which roll events and actor identity the installed Foundry/PF2e versions expose to the AMBA integration. Do not assume a stable dice log format or require the GM to copy a UUID into a journal entry. The GM's selected AMBA node supplies the narrative context.
+- **Manual or physical play:** if no provider record is available, the GM can use the PC roster and degree buttons. This remains button-only and records no raw die formula or typed total.
 
-The app records attribution only after the GM clicks an outcome. Merely opening the challenge, rolling in an external tool, or viewing the result table does not create a campaign record.
+Provider log integration may prefill a result, but the GM confirms it by clicking the outcome pill. Do not ingest or retain full dice-log transcripts.
 
-## Records, retries, and corrections
+## What the campaign record stores
 
-Each click records one actual check attempt with the campaign, source module revision, stable challenge/check identifier, degree, selected PC or Party, authored outcome text, provider metadata when available, and timestamp.
+Store only the accepted narrative fact and the source identity needed to find it later:
 
-A later attempt creates a separate record; it does not silently overwrite an earlier attempt. The History view lets the GM edit or remove a mistaken record. The encounter view shows the latest accepted state while retaining the attempt history.
+- Campaign and published source node/check identity.
+- PC identity, or Party when none is selected.
+- Accepted degree of success.
+- Authored outcome text or the exact published revision reference.
+- Timestamp and provider reference only when needed for deduplication or provenance.
 
-When a provider supplies a correlated result, AMBA GM may prefill the degree and roller, but the GM still confirms by clicking the matching outcome pill. Manual entry remains available when no provider is connected.
+A later attempt is a separate record. Do not silently replace earlier attempts. The History view supports button-driven correction or deletion. The GM can review the selected degree and authored text, then apply game mechanics in the provider.
 
-## Scope limits
+## Explicit exclusions
 
-- This records authored challenge outcomes for narrative and campaign memory.
-- It does not store a combat transcript or track initiative, HP, conditions, damage, or other combat state.
-- It does not infer a discovery or apply a later consequence solely from a roll. Only the selected authored outcome text is recorded.
-- It does not require a right-side event panel or post-encounter questionnaire.
+- In-app dice rolling, typed results, typed notes as part of roll capture, or raw dice transcript storage.
+- Damage, poison duration, conditions, HP, initiative, round tracking, or automated mechanics.
+- Requiring a Foundry journal UUID to be copied back and forth.
+- Automatic progression, consequences, rewards, or player reveals based only on a roll.
+- A second result panel or a post-encounter questionnaire.
