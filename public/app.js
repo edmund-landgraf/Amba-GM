@@ -101,7 +101,10 @@ function appendFact(list, label, value) {
   list.append(dt, dd);
 }
 
-function openOverview() {
+let overviewRequest = 0;
+
+async function openOverview() {
+  const request = ++overviewRequest;
   const module = state.selectedModule;
   if (!module) return;
   modulePanel.classList.add("hidden");
@@ -124,11 +127,32 @@ function openOverview() {
     appendFact(facts, "Player characters", count.pcs);
     appendFact(facts, "NPCs", count.npcs);
   }
-  $("overview-note").textContent = module.publicationStatus === "published"
-    ? "This overview comes from AMBA's module list. Opening a campaign will use a frozen published snapshot after the GM snapshot API is connected."
-    : "This module is still a draft. Publish it in AMBA before loading it as a campaign.";
-  $("start-button").disabled = true;
+  const note = $("overview-note");
+  const open = $("start-button");
+  open.disabled = true;
+  open.onclick = null;
+  open.textContent = "Open full syndication";
+  note.textContent = "Checking the published adventure…";
   setMessage("");
+  try {
+    const status = await apiGet(`/modules/${encodeURIComponent(module.id)}/syndication`);
+    if (request !== overviewRequest) return;
+    const full = status.syndications?.full;
+    if (!full?.url) {
+      note.textContent = "Publish a full syndication in AMBA to open this adventure.";
+      return;
+    }
+    const url = new URL(full.url, apiBaseUrl);
+    if (url.origin !== new URL(apiBaseUrl, location.href).origin || !url.pathname.startsWith("/syndicate/")) {
+      throw new Error("AMBA returned an unexpected publication address.");
+    }
+    if (Array.isArray(full.publishedPageIds)) appendFact(facts, "Published pages", full.publishedPageIds.length);
+    note.textContent = status.unreleasedChanges ? "The full publication is ready. AMBA has newer unpublished edits." : "The full publication is ready.";
+    open.onclick = () => location.assign(url.href);
+    open.disabled = false;
+  } catch (error) {
+    if (request === overviewRequest) note.textContent = error.message || "Could not load the full syndication.";
+  }
 }
 
 connectButton.addEventListener("click", () => void loadModules());
@@ -138,6 +162,7 @@ $("module-select").addEventListener("change", (event) => {
 });
 $("open-overview-button").addEventListener("click", openOverview);
 $("back-button").addEventListener("click", () => {
+  ++overviewRequest;
   overviewPanel.classList.add("hidden");
   modulePanel.classList.remove("hidden");
 });
