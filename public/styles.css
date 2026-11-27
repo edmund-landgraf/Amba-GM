@@ -1,0 +1,64 @@
+:root {
+  color-scheme: light;
+  --ink: #172820;
+  --muted: #66746c;
+  --green: #235e4b;
+  --green-dark: #20382e;
+  --line: #dce5df;
+  --paper: #f4f7f4;
+  --gold: #c38a35;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: var(--paper); }
+.topbar { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 max(24px, calc((100vw - 1120px) / 2)); color: #f7fbf8; background: var(--green-dark); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; font-size: 15px; letter-spacing: .06em; text-decoration: none; }
+.brand b { font-weight: 800; }
+.brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: var(--green-dark); background: #cde1d4; font-weight: 800; }
+.topbar-right { display: flex; align-items: center; gap: 22px; font-size: 13px; }
+.connection-state { color: #d0d9d3; }
+.connection-state.connected { color: #a9dfb5; }
+.quiet-link { color: #e0e9e3; text-decoration: none; }
+.page { width: min(960px, calc(100% - 40px)); margin: 52px auto 30px; }
+.intro { margin-bottom: 27px; }
+.eyebrow { margin: 0 0 9px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+h1 { margin: 0; font-size: clamp(30px, 4vw, 42px); letter-spacing: -.04em; }
+.lede { max-width: 650px; margin: 12px 0 0; color: var(--muted); font-size: 16px; line-height: 1.55; }
+.panel { margin: 18px 0; padding: 26px 29px; border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 12px 30px #243a2a0b; }
+.panel-copy { max-width: 640px; }
+.panel h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.panel-copy p:not(.eyebrow) { color: var(--muted); line-height: 1.55; }
+.button { min-height: 42px; padding: 0 17px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.button:disabled { opacity: .45; cursor: not-allowed; }
+.primary { color: white; background: var(--green); }
+.secondary { color: var(--green); border-color: #b9cbbf; background: white; }
+.select-row { display: grid; gap: 8px; max-width: 580px; margin: 21px 0 15px; }
+.select-row label { font-size: 13px; font-weight: 700; }
+select { width: 100%; height: 46px; padding: 0 13px; border: 1px solid #b7c7bc; border-radius: 8px; color: var(--ink); background: white; font: inherit; }
+.module-card { padding: 17px 19px; border: 1px solid var(--line); border-radius: 10px; background: #f8faf8; }
+.module-card h3 { margin: 0 0 6px; font-size: 17px; }
+.module-card p { margin: 0 0 11px; font-size: 13px; }
+.panel-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.overview-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.overview-heading h2 { font-size: 28px; }
+.muted { color: var(--muted); }
+.overview-description { margin: 24px 0; color: #35473d; font-size: 16px; line-height: 1.65; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin: 20px 0; }
+.facts dt { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.facts dd { margin: 4px 0 0; font-size: 15px; font-weight: 650; }
+.status { flex: none; padding: 7px 10px; border-radius: 20px; color: #795922; background: #f8f0df; font-size: 12px; font-weight: 750; }
+.status.published { color: #275a3e; background: #e7f3e9; }
+.notice { padding: 12px 14px; border-left: 3px solid var(--gold); border-radius: 6px; color: #65552f; background: #faf7ef; font-size: 13px; line-height: 1.5; }
+.message { min-height: 22px; color: var(--muted); font-size: 13px; }
+.message[data-kind="error"] { color: #a13d35; }
+footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.hidden { display: none !important; }
+@media (max-width: 650px) {
+  .topbar { padding: 0 18px; }
+  .topbar-right { gap: 11px; font-size: 12px; }
+  .page { margin-top: 30px; }
+  .panel { padding: 21px; }
+  .panel-actions { flex-direction: column-reverse; }
+  .panel-actions .button { width: 100%; }
+  .overview-heading { flex-direction: column; }
+}
