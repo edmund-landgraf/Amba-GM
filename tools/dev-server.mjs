@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { createReadStream, existsSync, statSync, mkdirSync, realpathSync } from "node:fs";
 import { campaignApi } from "../server/routes/campaign-api.mjs";
+import { postgresCampaignApi, postgresRuntimeEndpoint } from "../server/routes/postgres-campaign-api.mjs";
 import { openCampaignRepository } from "../server/storage/campaign-repository.mjs";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,8 +10,12 @@ const root = resolve(fileURLToPath(new URL("../public", import.meta.url)));
 const port = Number(process.env.PORT || 3010);
 const secret = process.env.AMBA_GM_RUNTIME_SECRET || "";
 const audience = process.env.AMBA_GM_RUNTIME_ORIGIN || "";
+const backend = process.env.AMBA_GM_RUNTIME_BACKEND || "sqlite";
+if (!["sqlite", "postgres"].includes(backend)) throw new Error("Unknown GM runtime backend.");
 let repository;
-if (secret || audience || process.env.AMBA_GM_DATA_DIR) {
+if (backend === "postgres") {
+  if (!audience || new URL(audience).origin !== audience || !process.env.AMBA_GM_API_BASE) throw new Error("Set exact GM origin and trusted AMBA API base.");
+} else if (secret || audience || process.env.AMBA_GM_DATA_DIR) {
   if (!/^[a-f0-9]{64}$/i.test(secret) || !audience || !process.env.AMBA_GM_DATA_DIR ||
       new URL(audience).origin !== audience) throw new Error("Set GM runtime secret, exact origin and private data directory.");
   const directory = resolve(process.env.AMBA_GM_DATA_DIR);
@@ -21,7 +26,9 @@ if (secret || audience || process.env.AMBA_GM_DATA_DIR) {
   process.umask(0o077);
   repository = openCampaignRepository(resolve(actual, "campaigns.sqlite"));
 }
-const executeCampaign = campaignApi({ repository, secret, audience });
+const executeCampaign = backend === "postgres"
+  ? postgresCampaignApi({ endpoint: postgresRuntimeEndpoint(process.env.AMBA_GM_API_BASE), audience })
+  : campaignApi({ repository, secret, audience });
 const types = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",

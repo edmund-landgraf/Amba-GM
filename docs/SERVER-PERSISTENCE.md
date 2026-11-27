@@ -1,5 +1,15 @@
 # Server-backed campaign persistence
 
+## PostgreSQL ledger mode (opt-in)
+
+Companion [AMBA PR #197](https://github.com/edmund-landgraf/AdventureMakerByAct/pull/197) adds the authoritative PostgreSQL event ledger. The browser keeps the existing #196 authorize URL, operation request, and GM response projection. In PostgreSQL mode the GM HTTP server is only a stateless proxy; it never opens or writes SQLite. AMBA issues a purpose-bound grant that the old SQLite verifier refuses, and verifies the grant and current ownership again before committing the operation. No fallback to SQLite on failure.
+
+**Cutover gate:** Do not enable this mode on an installation containing existing SQLite campaign history until a reviewed migration/export/restore procedure is available and validated. Existing data is not automatically imported, deleted, or visible from PostgreSQL. Stop writes and back up the old SQLite database (including WAL-consistent state), drain old grants (60 seconds), then coordinate both deployments. Set `AMBA_GM_RUNTIME_BACKEND=postgres` on both services; on GM server set `AMBA_GM_API_BASE=https://amba.unwhelm.online/api/v1` (trusted exact API URL), and `AMBA_GM_RUNTIME_ORIGIN` to the exact GM origin. Keep `AMBA_GM_RUNTIME_SECRET` configured on AMBA; the stateless GM proxy does not need a copy. Keep the old database offline and intact. A mixed configuration fails closed, not over to a second writable store. Rollback requires reconciling all committed PostgreSQL history first. No dual writes or automatic rollback.
+
+Verify paired authenticated deployments on a disposable module, including save/reload, PC attribution, conflict/replay, correction/removal, republish, and another account. Existing SQLite configuration below remains the default pending migration acceptance.
+
+## Legacy SQLite mode
+
 AMBA remains the authoring authority; the GM application owns a separate SQLite database. No authoring rows are written by this runtime. This changes the server requirement to Node 22.13+.
 
 ## Deployment
