@@ -31,6 +31,6 @@ The module overview is built from stable module-list metadata and the module sub
 1. Provide an explicit GM-app authorization flow or otherwise authorize the existing AMBA session for the configured app origin.
 2. Provide a read-only module list scoped to the authenticated AMBA user, with the same rows and status behavior as the authoring picker.
 3. Provide a read-only full published snapshot endpoint for a selected module. Include stable node IDs, publication revision, asset references, and the GM-safe projection. This endpoint must not call editor repair or mutate authoring records.
-4. Keep campaign notes, event outcomes, and session history in AMBA GM's own storage, isolated by GM and campaign.
+4. Keep button-confirmed event outcomes and session history in AMBA GM's own storage, isolated by GM and campaign.
 
 No credentials are stored by this starter. The list and overview are read-only.
