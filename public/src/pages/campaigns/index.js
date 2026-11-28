@@ -1,5 +1,6 @@
 import { element, button } from "../../components/dom.js";
 import { activeSession } from "../../domain/campaigns.js";
+import { renderCampaignDashboard } from "./dashboard.js";
 import { outcomeStorageKey, readOutcomes } from "../../domain/outcomes.js";
 import { openWorkspace } from "../play/index.js";
 
@@ -63,8 +64,8 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, leg
       const matching = campaign.revision === snapshot.revision;
       const row = element("section");
       row.append(element("h3", campaign.name));
-      row.append(element("p", campaign.sessions.length + " sessions · " + campaign.outcomes.length + " accepted outcomes"));
-      if (active) row.append(element("p", "Session " + active.number + " is active."));
+      row.className = "campaign-card";
+      row.append(renderCampaignDashboard(campaign, snapshot));
       if (!matching) row.append(element("p", "This campaign uses a different publication revision. Its history is preserved; opening it requires that revision or an explicit migration."));
       const open = button(active ? "Resume session " + active.number : "Open campaign", () => void run(async () => {
         const latest = (await store.list()).find(c => c.id === campaign.id);
@@ -80,7 +81,12 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, leg
       const exportHistory = button("Export campaign history", () => downloadJson({
         schemaVersion: 1, moduleId: snapshot.moduleId, campaign,
       }, "amba-gm-" + campaign.id + ".json"));
-      row.append(open, exportHistory);
+      open.className = "button primary";
+      exportHistory.className = "button secondary";
+      const actions = element("div");
+      actions.className = "campaign-actions";
+      actions.append(open, exportHistory);
+      row.append(actions);
       list.append(row);
     }
   }

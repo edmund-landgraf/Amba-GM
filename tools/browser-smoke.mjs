@@ -123,13 +123,33 @@ try {
   await visible(page.getByRole("heading", { name: "Kota · Shrine check · Success", exact: true }));
   await button("End session 1").click();
   await visible(button("Start session 2"));
+  await visible(page.getByRole("heading", { name: "Session and outcome history", exact: true }));
   await button("Session and outcome history").click();
   await visible(page.getByRole("heading", { name: "Session 1 · Completed", exact: true }));
   await page.getByText("Correct result", { exact: true }).click();
   await page.getByRole("button", { name: "Correct Shrine check to Failure" }).click();
   await visible(page.getByRole("heading", { name: "Kota · Shrine check · Failure", exact: true }));
+  // Confirm the dashboard is derived from the corrected persisted record.
+  await button("Back to campaigns").click();
+  const firstCard = page.locator(".campaign-card").filter({ has: page.getByRole("heading", { name: "First table", exact: true }) });
+  await visible(firstCard.getByRole("heading", { name: "Previous completed session", exact: true }));
+  await visible(firstCard.getByText("Act 1 / Scene 1 / Shrine encounter", { exact: true }));
+  await firstCard.locator(".campaign-chronicles > summary").click();
+  await firstCard.locator(".chronicle-session > summary").click();
+  await visible(firstCard.getByText("No useful clue.", { exact: true }));
+  assert.equal(await firstCard.getByText("The symbol is visible.", { exact: true }).count(), 0);
+  const download = page.waitForEvent("download");
+  await firstCard.getByRole("button", { name: "Export session 1 chronicle" }).click();
+  const exported = await download;
+  assert.equal(exported.suggestedFilename(), "amba-gm-session-1.txt");
+  const file = await exported.path();
+  const { readFileSync } = await import("node:fs");
+  assert.match(readFileSync(file, "utf8"), /No useful clue\./);
+  assert.doesNotMatch(readFileSync(file, "utf8"), /The symbol is visible/);
+  await firstCard.getByRole("button", { name: "Open campaign", exact: true }).click();
   await button("Start session 2").click();
   await visible(button("End session 2"));
+  console.log("PASS: dashboard resume position, corrected chronicle and GM-private text export");
   console.log("PASS: server restart, fresh browser, resume, completed history correction and next session");
 
   await button("Back to campaigns").click();
