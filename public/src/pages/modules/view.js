@@ -10,13 +10,10 @@ export const markup = `
     <section id="module-panel" class="panel hidden" aria-labelledby="module-heading">
       <div class="panel-copy">
         <p class="eyebrow">YOUR MODULES</p>
-        <h2 id="module-heading">Select a module</h2>
-        <p>The list follows AMBA's module picker, including draft and published modules.</p>
+        <h2 id="module-heading">Choose an adventure to run</h2>
+        <p>Play Now lists published modules with a full syndication. Drafts stay in Authoring.</p>
       </div>
-      <div class="select-row">
-        <label for="module-select">Module</label>
-        <select id="module-select"><option value="">Choose a module…</option></select>
-      </div>
+      <div id="module-list" class="module-list"></div>
       <div id="module-card" class="module-card hidden"></div>
       <div class="panel-actions">
         <button id="refresh-button" class="button secondary">Refresh list</button>

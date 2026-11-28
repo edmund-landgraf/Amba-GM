@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { collectPlayerCharacters, containsPage, projectStoryActs, projectStoryNodes } from "../public/src/domain/story-tree.js";
+import { collectPlayerCharacters, containsPage, filterStoryTree, groupPagesByPlace, projectStoryActs, projectStoryNodes } from "../public/src/domain/story-tree.js";
 
 test("projects only the Acts story hierarchy and leaves source data untouched", () => {
   const tree = [{ kind: "module", children: [
@@ -39,6 +39,32 @@ test("retains supported four-level containers and nested narrative overlays", ()
   assert.equal(projected[0].children[0].children[0].children[0].children[0].title, "Story note");
   assert.equal(containsPage(projected[0], "note"), true);
   assert.equal(containsPage(projected[0], "missing"), false);
+});
+
+test("campaign location view groups encounter pages under their scene", () => {
+  const story = [{ typeKey: "act", title: "Act 1", children: [
+    { typeKey: "scene", title: "Reiver's Right", children: [
+      { typeKey: "encounter", title: "Watchtower", pageId: "e15", areaCode: "E15" },
+      { typeKey: "encounter", title: "North Track", pageId: "e17", areaCode: "E17" },
+    ] },
+  ] }];
+  const groups = groupPagesByPlace(story, ["e15", "e17"]);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].placeTitle, "Reiver's Right");
+  assert.deepEqual(groups[0].pages.map(page => page.pageId), ["e15", "e17"]);
+});
+
+test("tree search keeps ancestors of matching encounters", () => {
+  const story = [{ title: "Act 1", children: [
+    { title: "Scene 2 — Reiver's Right", children: [
+      { areaCode: "E15", title: "Watchtower", pageId: "e15" },
+      { areaCode: "E17", title: "North Track", pageId: "e17" },
+    ] },
+  ] }];
+  const found = filterStoryTree(story, "watch");
+  assert.equal(found[0].children[0].children[0].pageId, "e15");
+  assert.equal(found[0].children[0].children.length, 1);
+  assert.deepEqual(filterStoryTree(story, "missing"), []);
 });
 
 test("handles a 597-page publication without admitting non-story sections", () => {

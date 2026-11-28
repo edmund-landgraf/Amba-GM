@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node tools/dev-server.mjs",
     "start": "node tools/dev-server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "doctor": "node tools/doctor.mjs"
   },
   "engines": {
     "node": ">=22.13.0"

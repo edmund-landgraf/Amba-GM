@@ -2,6 +2,7 @@ import { element, button } from "../../components/dom.js";
 import { activeSession } from "../../domain/campaigns.js";
 import { outcomeStorageKey, readOutcomes } from "../../domain/outcomes.js";
 import { openWorkspace } from "../play/index.js";
+import { openPartySetup } from "./party-setup.js";
 
 function downloadJson(value, name) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }));
@@ -14,7 +15,7 @@ function downloadJson(value, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, legacyStore, readerUrl, exit, isCurrent }) {
+export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, legacyStore, readerUrl, exit, isCurrent, storageNote }) {
   const root = element("section");
   root.className = "panel";
   const status = element("p");
@@ -33,7 +34,7 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, leg
     root.remove();
     exit();
   });
-  const create = button("Create campaign", () => void run(async () => {
+  const create = button("Start a new game", () => void run(async () => {
     await store.create({ id: crypto.randomUUID(), name: name.value, revision: snapshot.revision });
     name.value = "";
     await refresh();
@@ -66,14 +67,34 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, leg
       row.append(element("p", campaign.sessions.length + " sessions · " + campaign.outcomes.length + " accepted outcomes"));
       if (active) row.append(element("p", "Session " + active.number + " is active."));
       if (!matching) row.append(element("p", "This campaign uses a different publication revision. Its history is preserved; opening it requires that revision or an explicit migration."));
-      const open = button(active ? "Resume session " + active.number : "Open campaign", () => void run(async () => {
-        const latest = (await store.list()).find(c => c.id === campaign.id);
-        if (!latest || latest.revision !== snapshot.revision) throw new Error("This campaign is unavailable for this publication.");
+      const launch = latest => {
         openWorkspace(snapshot, moduleTitle, latest, store, () => {
           root.hidden = false;
           void run(refresh);
         }, readerUrl, root);
         root.hidden = true;
+      };
+      const open = button(active ? "Resume session " + active.number : "Resume campaign", () => void run(async () => {
+        const latest = (await store.list()).find(c => c.id === campaign.id);
+        if (!latest || latest.revision !== snapshot.revision) throw new Error("This campaign is unavailable for this publication.");
+        const needsParty = !Array.isArray(latest.partyPcIds);
+        if (needsParty) {
+          const setup = openPartySetup({
+            snapshot,
+            moduleTitle,
+            onBack: () => { setup.remove(); root.hidden = false; },
+            onContinue: async partyPcIds => {
+              const saved = await store.change({
+                id: latest.id, revision: latest.revision, expectedVersion: latest.version,
+                command: { type: "setParty", partyPcIds },
+              });
+              setup.remove();
+              launch(saved);
+            },
+          });
+          root.before(setup);
+          root.hidden = true;
+        } else launch(latest);
       }));
       open.dataset.unavailable = String(!matching);
       open.disabled = !matching;
@@ -85,7 +106,7 @@ export async function openCampaigns({ snapshot, moduleTitle, ownerId, store, leg
     }
   }
   root.append(back, element("h2", moduleTitle + " — Campaigns"),
-    element("p", "Campaigns are saved on the GM server for your AMBA account. Exports contain GM-private history."),
+    element("p", storageNote || "Campaigns are saved on the GM server for your AMBA account. Exports contain GM-private history."),
     status, name, create, list);
   // Do not silently assign the predecessor's revision-scoped tab history to any new game.
   try {

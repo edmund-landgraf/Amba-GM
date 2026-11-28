@@ -2,41 +2,72 @@ import { element, button } from "../../components/dom.js";
 import { renderPublishedContent } from "./published-content.js";
 import { availableDegrees, degreeLabels, outcomeNarrative } from "../../domain/outcomes.js";
 import { activeSession } from "../../domain/campaigns.js";
-import { collectPlayerCharacters, containsPage, projectStoryActs } from "../../domain/story-tree.js";
+import { collectPlayerCharacters, containsPage, filterStoryTree, groupPagesByPlace, projectStoryActs } from "../../domain/story-tree.js";
 import { renderSessionControls } from "./session-controls.js";
 
 export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exit, readerUrl, mountAfter) {
   let campaign = initialCampaign;
   let busy = false;
   let currentId = null;
-  let historyView = false;
+  let activeTab = "run";
   let closed = false;
   const root = element("section");
   root.className = "gm-workspace";
-  const back = button("Back to campaigns", () => { if (busy) return; closed = true; root.remove(); exit(); });
+  const pageShell = document.getElementById("app");
+  pageShell?.classList.add("gm-wide");
+  const back = button("Back to campaigns", () => {
+    if (busy) return;
+    closed = true;
+    pageShell?.classList.remove("gm-wide");
+    root.remove();
+    exit();
+  });
   const heading = element("h2", moduleTitle);
   const layout = element("div");
   layout.className = "gm-layout";
   const nav = element("nav");
   nav.setAttribute("aria-label", "Published adventure");
   const page = element("article");
+  const tabBar = element("p");
+  tabBar.className = "gm-tabs";
+  tabBar.setAttribute("role", "tablist");
   const pcs = new Map();
   let selectedPc = "";
   let currentButton;
   const sessionControls = element("section");
   const feedback = element("p");
   feedback.setAttribute("role", "status");
+  const tabButtons = {};
+
+  function setTab(tab) {
+    activeTab = tab;
+    for (const [name, control] of Object.entries(tabButtons)) {
+      const selected = name === tab;
+      control.setAttribute("aria-selected", String(selected));
+      control.classList.toggle("active", selected);
+    }
+    if (tab === "run" && currentId) show(currentId);
+    else if (tab === "history") showHistory();
+    else if (tab === "campaign") showCampaign();
+  }
+
+  for (const [id, label] of [["run", "Run"], ["campaign", "Campaign"], ["history", "History"]]) {
+    const tab = button(label, () => { if (!busy) setTab(id); });
+    tab.setAttribute("role", "tab");
+    tabButtons[id] = tab;
+    tabBar.append(tab);
+  }
 
   function refreshControls() {
     renderSessionControls(sessionControls, campaign, {
       busy,
+      revision: snapshot.revision,
       start: () => void mutate({ type: "start", sessionId: crypto.randomUUID(), pageId: currentId }, "Session started."),
       end: () => {
         const active = activeSession(campaign);
         if (!busy && active && window.confirm("End session " + active.number + "? Recorded outcomes will remain available."))
           void mutate({ type: "end", sessionId: active.id }, "Session ended.");
       },
-      history: () => { if (!busy) showHistory(); },
     });
   }
 
@@ -59,9 +90,10 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     }
     if (!succeeded || closed) return false;
     if (after) after();
-    else if (historyView) showHistory();
+    else if (activeTab === "history") showHistory();
+    else if (activeTab === "campaign") showCampaign();
     else if (currentId) show(currentId);
-    feedback.textContent = message;
+    if (message) feedback.textContent = message;
     return true;
   }
 
@@ -99,11 +131,67 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
     }
   }
 
+  function openPageFromCampaign(pageId) {
+    activeTab = "run";
+    setTab("run");
+    const choice = nav.querySelector('button[data-page-id="' + pageId + '"]');
+    if (choice) choice.click();
+  }
+
+  function fillPage(title, ...nodes) {
+    page.replaceChildren(tabBar, element("h2", title), ...nodes);
+  }
+
+  function showCampaign() {
+    currentButton?.removeAttribute("aria-current");
+    const places = element("section");
+    places.append(element("h3", "Locations"));
+    const pageIds = [...new Set([...campaign.outcomes.map(o => o.pageId), campaign.lastPageId].filter(Boolean))];
+    const groups = groupPagesByPlace(story, pageIds);
+    if (!pageIds.length) places.append(element("p", "No campaign position or outcomes yet."));
+    else if (!groups.length) {
+      for (const pageId of pageIds) {
+        const data = snapshot.pages[pageId];
+        const count = campaign.outcomes.filter(o => o.pageId === pageId).length;
+        const card = element("section");
+        card.className = "place-card";
+        card.append(element("strong", data?.title || pageId));
+        card.append(element("p", count + " recorded outcome" + (count === 1 ? "" : "s")));
+        if (data) card.append(button("Open in Run tab", () => openPageFromCampaign(pageId)));
+        places.append(card);
+      }
+    } else {
+      for (const group of groups) {
+        places.append(element("h4", group.placeTitle));
+        for (const page of group.pages) {
+          const count = campaign.outcomes.filter(o => o.pageId === page.pageId).length;
+          const card = element("section");
+          card.className = "place-card";
+          card.append(element("strong", [page.areaCode, page.title].filter(Boolean).join(" ")));
+          card.append(element("p", count + " recorded outcome" + (count === 1 ? "" : "s")));
+          card.append(button("Open in Run tab", () => openPageFromCampaign(page.pageId)));
+          places.append(card);
+        }
+      }
+    }
+    const timeline = element("section");
+    timeline.append(element("h3", "Recent campaign history"));
+    const ordered = [...campaign.outcomes].sort((a, b) => Date.parse(b.recordedAt) - Date.parse(a.recordedAt));
+    if (!ordered.length) timeline.append(element("p", "No campaign records yet."));
+    for (const entry of ordered.slice(0, 12)) {
+      const source = snapshot.pages[entry.pageId];
+      const event = element("p");
+      event.append(element("strong", (source?.title || entry.pageId) + " · " + entry.label));
+      event.append(document.createTextNode(" — " + entry.actor + " · " + new Date(entry.recordedAt).toLocaleString()));
+      timeline.append(event);
+    }
+    fillPage("Locations and campaign history", places, timeline);
+    feedback.textContent = "";
+  }
+
   function showHistory() {
     currentButton?.removeAttribute("aria-current");
     currentButton = undefined;
-    historyView = true;
-    page.replaceChildren(element("h2", "Session and outcome history"));
     const sessions = element("section");
     sessions.append(element("h3", "Sessions"));
     if (!campaign.sessions.length) sessions.append(element("p", "No sessions yet."));
@@ -114,24 +202,49 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
         (session.endedAt ? " - " + new Date(session.endedAt).toLocaleString() : "") + " · " + count + " accepted outcomes"));
     }
     const log = element("section");
-    feedback.textContent = "";
-    page.append(sessions, log);
     renderHistory(log);
+    fillPage("Session and outcome history", sessions, log);
+    feedback.textContent = "";
   }
 
   function show(id) {
     if (!Object.hasOwn(snapshot.pages, id)) return;
-    historyView = false;
     currentId = id;
     const data = snapshot.pages[id];
-    page.replaceChildren(element("h2", data.title));
-    if (data.subtitle) page.append(element("p", data.subtitle));
-    renderPublishedContent(page, data);
-    const log = element("section");
+    const heading = [];
+    if (data.subtitle) heading.push(element("p", data.subtitle));
+    const columns = element("div");
+    columns.className = "gm-node-panels";
+    const read = element("section");
+    read.append(element("h3", "At a glance"));
+    const chips = element("p");
+    chips.className = "gm-chips";
+    const challengeCount = data.challenges?.length || 0;
+    chips.append(
+      Object.assign(element("span", "Narrative"), { className: "chip" }),
+      Object.assign(element("span", challengeCount + " challenge" + (challengeCount === 1 ? "" : "s")), { className: "chip" }),
+    );
+    read.append(chips);
+    renderPublishedContent(read, data);
+    read.append(element("p", "Published material only — no authoring controls."));
+    const actions = element("section");
+    actions.append(element("h3", "Record what happened"));
     for (const table of data.challenges || []) {
       const block = element("section");
-      block.append(element("h3", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" · ")));
+      block.className = "challenge-block";
+      block.append(element("h4", table.title), element("p", [...(table.check.skills || []), "DC " + (table.check.dcLabel || table.check.dc)].join(" · ")));
+      const recorded = campaign.outcomes.filter(item => item.pageId === id && item.tableId === table.id);
+      if (recorded.length) {
+        const latest = recorded[recorded.length - 1];
+        const accepted = element("p");
+        accepted.className = "accepted-result";
+        accepted.append(element("strong", "Recorded · " + latest.actor + " · " + latest.label));
+        accepted.append(document.createTextNode(" — " + (latest.outcomeText || "")));
+        block.append(accepted);
+      }
       for (const degree of availableDegrees(table)) {
+        const row = element("div");
+        row.className = "degree-row";
         const accept = button(degreeLabels[degree], () => {
           const session = activeSession(campaign);
           if (!session || busy) return;
@@ -143,18 +256,47 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
           });
         });
         accept.disabled = !activeSession(campaign);
-        block.append(accept);
+        accept.classList.add("degree-btn");
+        row.append(accept, element("p", table.degrees[degree]));
+        block.append(row);
       }
-      page.append(block);
+      const dispositions = element("div");
+      dispositions.className = "degree-row";
+      for (const type of ["skip", "notApplicable"]) {
+        const label = type === "skip" ? "Skip" : "Not applicable";
+        const control = button(label, () => {
+          const session = activeSession(campaign);
+          if (!session || busy) return;
+          const actor = pcs.get(selectedPc) || "Party";
+          void mutate({ type, sessionId: session.id, key: crypto.randomUUID(), pageId: id, table,
+            pcId: selectedPc || null, actor }, actor + " · " + label, () => {
+            selectPc("");
+            show(id);
+          });
+        });
+        control.disabled = !activeSession(campaign);
+        control.classList.add("degree-btn", "secondary");
+        dispositions.append(control);
+      }
+      block.append(dispositions);
+      actions.append(block);
     }
-    feedback.textContent = "";
-    page.append(log);
+    if (!data.challenges?.length) actions.append(element("p", "This node has no authored challenge buttons."));
+    const log = element("section");
     renderHistory(log, id);
+    actions.append(log);
+    columns.append(read, actions);
+    fillPage(data.title, ...heading, columns);
+    feedback.textContent = "";
   }
 
-  for (const [id, title] of collectPlayerCharacters(snapshot.tree)) pcs.set(id, title);
+  const party = Array.isArray(initialCampaign.partyPcIds) ? initialCampaign.partyPcIds : null;
+  for (const [id, title] of collectPlayerCharacters(snapshot.tree)) {
+    if (!party || party.includes(id)) pcs.set(id, title);
+  }
 
-  function tree(nodes, depth) {
+  let treeQuery = "";
+  function tree(nodes, depth, forceOpen) {
     const list = element("ul");
     for (const node of nodes) {
       const item = element("li");
@@ -162,11 +304,11 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
       let row = item;
       if (node.children?.length) {
         const branch = element("details");
-        branch.open = depth === 0 || containsPage(node, campaign.lastPageId);
+        branch.open = forceOpen || depth <= 1 || containsPage(node, campaign.lastPageId);
         const summary = element("summary");
         branch.append(summary);
         const populate = () => {
-          if (branch.open && branch.children.length === 1) branch.append(tree(node.children, depth + 1));
+          if (branch.open && branch.children.length === 1) branch.append(tree(node.children, depth + 1, forceOpen));
         };
         branch.addEventListener("toggle", populate);
         populate();
@@ -180,12 +322,21 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
             currentButton?.removeAttribute("aria-current");
             currentButton = choice;
             choice.setAttribute("aria-current", "page");
-            show(node.pageId);
+            activeTab = "run";
+            setTab("run");
           };
           const active = activeSession(campaign);
           if (active && campaign.lastPageId !== node.pageId) {
-            void mutate({ type: "position", sessionId: active.id, pageId: node.pageId }, "", open);
-          } else open();
+            void mutate({ type: "position", sessionId: active.id, pageId: node.pageId }, "", () => {
+              currentId = node.pageId;
+              open();
+              show(node.pageId);
+            });
+          } else {
+            currentId = node.pageId;
+            open();
+            show(node.pageId);
+          }
         });
         choice.dataset.pageId = node.pageId;
         row.append(choice);
@@ -197,7 +348,25 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
 
   const story = projectStoryActs(snapshot.tree);
   nav.setAttribute("aria-label", "Story acts");
-  nav.append(tree(story, 0));
+  const treeTop = element("div");
+  treeTop.className = "treetop";
+  treeTop.append(element("strong", "Adventure"));
+  const search = element("input");
+  search.type = "search";
+  search.placeholder = "Search scenes";
+  search.setAttribute("aria-label", "Search published scenes");
+  const treeHost = element("div");
+  function renderTree() {
+    const filtered = filterStoryTree(story, treeQuery);
+    treeHost.replaceChildren(tree(filtered, 0, Boolean(treeQuery.trim())));
+  }
+  search.addEventListener("input", () => {
+    treeQuery = search.value;
+    renderTree();
+  });
+  treeTop.append(search);
+  nav.append(treeTop, treeHost);
+  renderTree();
   const roster = element("fieldset");
   roster.append(element("legend", "Record for"));
   function selectPc(id) {
@@ -220,14 +389,12 @@ export function openWorkspace(snapshot, moduleTitle, initialCampaign, store, exi
   root.append(back, reader, heading, feedback, layout);
   mountAfter.after(root);
   refreshControls();
+  setTab("run");
   const choices = [...nav.querySelectorAll("button[data-page-id]")];
   const first = choices.find(choice => choice.dataset.pageId === campaign.lastPageId) || choices[0];
   if (first) {
     currentButton = first;
     first.setAttribute("aria-current", "page");
     show(first.dataset.pageId);
-  }
-  else page.append(element("p", story.length ? "Expand an act to choose a story node." : "This publication has no story acts."));
+  } else fillPage(moduleTitle, element("p", story.length ? "Expand an act to choose a story node." : "This publication has no story acts."));
 }
-
-

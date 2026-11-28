@@ -13,7 +13,8 @@ export const markup = `
       <div id="overview-note" class="notice"></div>
       <div class="panel-actions">
         <button id="back-button" class="button secondary">Back to modules</button>
-        <button id="start-button" class="button primary" disabled title="Campaign loading starts after the private snapshot API is defined">Start campaign</button>
+        <button id="browse-button" class="button secondary" disabled title="Open the published tree without saving to the GM server">Browse adventure</button>
+        <button id="start-button" class="button primary" disabled title="Saved campaigns require GM server storage (see .env)">Manage campaigns</button>
       </div>
     </section>
 `;

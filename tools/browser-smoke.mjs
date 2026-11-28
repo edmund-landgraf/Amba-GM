@@ -100,6 +100,7 @@ try {
   await page.getByRole("textbox", { name: "New campaign name" }).fill("First table");
   await button("Create campaign").click();
   await button("Open campaign").click();
+  await button("Import to campaign").click();
   await button("Start session 1").click();
   await visible(button("End session 1"));
   await page.locator("nav details").nth(1).evaluate(el => { el.open = true; });
@@ -123,7 +124,7 @@ try {
   await visible(page.getByRole("heading", { name: "Kota · Shrine check · Success", exact: true }));
   await button("End session 1").click();
   await visible(button("Start session 2"));
-  await button("Session and outcome history").click();
+  await button("History").click();
   await visible(page.getByRole("heading", { name: "Session 1 · Completed", exact: true }));
   await page.getByText("Correct result", { exact: true }).click();
   await page.getByRole("button", { name: "Correct Shrine check to Failure" }).click();
@@ -136,8 +137,9 @@ try {
   await page.getByRole("textbox", { name: "New campaign name" }).fill("Second table");
   await button("Create campaign").click();
   await button("Open campaign").click();
+  await button("Import to campaign").click();
   await visible(button("Start session 1"));
-  await button("Session and outcome history").click();
+  await button("History").click();
   await visible(page.getByText("No accepted outcomes yet.", { exact: true }));
   console.log("PASS: second campaign isolated from first");
 

@@ -45,6 +45,16 @@ test("no overlapping sessions, duplicate session IDs or stale session operations
   assert.throws(() => change(ended, { type: "end", sessionId: "s1" }, 3), /not active/);
 });
 
+test("party roster is stored on the campaign and skipped on identical save", () => {
+  const created = create();
+  assert.equal(created.campaign.partyPcIds, undefined);
+  const saved = change(created, { type: "setParty", partyPcIds: ["pc-fighter", "pc-cleric"] });
+  assert.deepEqual(saved.campaign.partyPcIds, ["pc-fighter", "pc-cleric"]);
+  const again = change(saved, { type: "setParty", partyPcIds: ["pc-fighter", "pc-cleric"] }, 2);
+  assert.equal(again.campaign, saved.campaign);
+  assert.throws(() => change(saved, { type: "setParty", partyPcIds: ["pc-fighter", "pc-fighter"] }, 2), /roster/);
+});
+
 test("saved navigation is not inferred outcome; no session means no saved position", () => {
   const initial = create();
   assert.throws(() => change(initial, { type: "position", sessionId: "s1", pageId: "x" }), /active session/);
@@ -54,6 +64,16 @@ test("saved navigation is not inferred outcome; no session means no saved positi
   assert.equal(moved.campaign.outcomes.length, 0);
   const again = change(moved, { type: "position", sessionId: "s1", pageId: "enc2" }, 3);
   assert.equal(again.campaign, moved.campaign);
+});
+
+test("skip and not-applicable are distinct from authored degrees", () => {
+  const started = start();
+  const skipped = change(started, { type: "skip", sessionId: "s1", key: "skip1", pageId: "enc1", table, actor: "Party", pcId: null }, 2);
+  assert.equal(skipped.campaign.outcomes[0].degree, "skipped");
+  assert.equal(skipped.campaign.outcomes[0].label, "Skipped");
+  const na = change(skipped, { type: "notApplicable", sessionId: "s1", key: "na1", pageId: "enc1", table, actor: "Party", pcId: null }, 3);
+  assert.equal(na.campaign.outcomes[1].degree, "notApplicable");
+  assert.equal(na.campaign.outcomes[1].outcomeText, "Not applicable");
 });
 
 test("accepted result belongs to active session and cannot be recorded twice", () => {

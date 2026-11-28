@@ -2,7 +2,10 @@
 export const degreeLabels = Object.freeze({
   criticalSuccess: "Critical success", success: "Success",
   failure: "Failure", criticalFailure: "Critical failure",
+  skipped: "Skipped", notApplicable: "Not applicable",
 });
+
+const pf2eDegrees = ["criticalSuccess", "success", "failure", "criticalFailure"];
 
 function nonempty(value) { return typeof value === "string" && value.trim().length > 0; }
 
@@ -13,13 +16,21 @@ export function outcomeStorageKey(ownerId, snapshot) {
 }
 
 export function availableDegrees(table) {
-  return Object.keys(degreeLabels).filter(degree =>
+  return pf2eDegrees.filter(degree =>
     Object.hasOwn(table?.degrees || {}, degree) && nonempty(table.degrees[degree]));
 }
 
+export function dispositionTable(table, degree) {
+  if (!table?.id || !table?.title || (degree !== "skipped" && degree !== "notApplicable")) return null;
+  return { id: table.id, title: table.title, degrees: { [degree]: degreeLabels[degree] } };
+}
+
 export function createOutcome({ pageId, table, pcId, actor, degree, key, recordedAt }) {
+  const allowed = degree === "skipped" || degree === "notApplicable"
+    ? nonempty(table?.degrees?.[degree])
+    : availableDegrees(table).includes(degree);
   if (![pageId, table?.id, table?.title, actor, key, recordedAt].every(nonempty) ||
-      !availableDegrees(table).includes(degree) || !Number.isFinite(Date.parse(recordedAt))) {
+      !allowed || !Number.isFinite(Date.parse(recordedAt))) {
     throw new Error("An accepted outcome requires a published check, authored degree, identity and timestamp.");
   }
   return {

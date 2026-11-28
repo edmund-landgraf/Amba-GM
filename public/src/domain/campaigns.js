@@ -1,4 +1,4 @@
-import { createOutcome, correctOutcome, removeOutcome, degreeLabels } from "./outcomes.js";
+import { createOutcome, correctOutcome, removeOutcome, degreeLabels, dispositionTable } from "./outcomes.js";
 
 const text = value => typeof value === "string" && value.trim().length > 0;
 const date = value => text(value) && Number.isFinite(Date.parse(value));
@@ -21,6 +21,7 @@ export function validateCampaigns(value) {
     requireThat(c && [c.id, c.name, c.revision].every(text) && date(c.createdAt) &&
       date(c.updatedAt) && Number.isSafeInteger(c.version) && c.version >= 1 &&
       (c.lastPageId === null || text(c.lastPageId)) &&
+      (c.partyPcIds === undefined || (Array.isArray(c.partyPcIds) && unique(c.partyPcIds) && c.partyPcIds.every(text))) &&
       Array.isArray(c.sessions) && Array.isArray(c.outcomes), "Invalid campaign record.");
     requireThat(unique(c.sessions.map(s => s?.id)) && unique(c.outcomes.map(o => o?.key)), "Duplicate session or outcome.");
     let open = 0;
@@ -81,10 +82,14 @@ export function changeCampaign(campaigns, { id, expectedVersion, revision, comma
       requireThat(active && active.id === command.sessionId && text(command.pageId), "An active session is required to save position.");
       if (before.lastPageId !== command.pageId) next = { ...before, lastPageId: command.pageId };
       break;
-    case "accept": {
+    case "accept":
+    case "skip":
+    case "notApplicable": {
       requireThat(active && active.id === command.sessionId, "Start a session before recording an outcome.");
       requireThat(!before.outcomes.some(o => o.key === command.key), "Outcome already recorded.");
-      const record = createOutcome({ ...command, recordedAt: now });
+      const degree = command.type === "accept" ? command.degree : command.type === "skip" ? "skipped" : "notApplicable";
+      const table = command.type === "accept" ? command.table : dispositionTable(command.table, degree);
+      const record = createOutcome({ ...command, table, degree, recordedAt: now });
       next = { ...before, lastPageId: record.pageId, outcomes: [...before.outcomes, { ...record, sessionId: active.id }] };
       break;
     }
@@ -98,6 +103,14 @@ export function changeCampaign(campaigns, { id, expectedVersion, revision, comma
       requireThat(before.outcomes.some(o => o.key === command.key), "The selected outcome no longer exists.");
       next = { ...before, outcomes: removeOutcome(before.outcomes, command.key) };
       break;
+    case "setParty": {
+      const ids = command.partyPcIds;
+      requireThat(Array.isArray(ids) && unique(ids) && ids.every(text) && ids.length <= 64, "Invalid party roster.");
+      const same = Array.isArray(before.partyPcIds) && before.partyPcIds.length === ids.length &&
+        before.partyPcIds.every((id, i) => id === ids[i]);
+      if (!same) next = { ...before, partyPcIds: [...ids] };
+      break;
+    }
     default: throw new Error("Unknown campaign operation.");
   }
   if (next === before) return { campaigns, campaign: before };

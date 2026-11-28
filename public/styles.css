@@ -20,6 +20,7 @@ body { margin: 0; color: var(--ink); background: var(--paper); }
 .connection-state.connected { color: #a9dfb5; }
 .quiet-link { color: #e0e9e3; text-decoration: none; }
 .page { width: min(960px, calc(100% - 40px)); margin: 52px auto 30px; }
+.page.gm-wide { width: min(1280px, calc(100% - 32px)); margin-top: 20px; }
 .intro { margin-bottom: 27px; }
 .eyebrow { margin: 0 0 9px; color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(30px, 4vw, 42px); letter-spacing: -.04em; }
@@ -63,12 +64,25 @@ footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line);
   .overview-heading { flex-direction: column; }
 }
 
+.module-list { display:grid; gap:8px; margin:18px 0 8px }
+.module-row { display:flex; justify-content:space-between; align-items:center; gap:12px; width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:#fff; text-align:left; cursor:pointer; font:inherit }
+.module-row.selected { border:2px solid var(--green); background:#f5faf6 }
+.module-row strong { font-size:14px }
+.chip { display:inline-block; margin:0 4px 4px 0; padding:3px 8px; border:1px solid var(--line); border-radius:12px; font-size:11px; color:#52645a; background:#fff }
+.degree-btn { margin:0 }
+.degree-row { display:grid; grid-template-columns:minmax(7.5rem,auto) 1fr; gap:.55rem; align-items:start; margin:.45rem 0 }
+.degree-row p { margin:0; font-size:12px; color:var(--muted); line-height:1.4 }
+.challenge-block { margin:.75rem 0 }
+.accepted-result { padding:.45rem .6rem; border-radius:6px; background:#edf4ef; color:#305d45; font-size:12px }
+.treetop { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.5rem }
+.treetop input { width:9rem; min-width:0; padding:.25rem .4rem; border:1px solid var(--line); border-radius:6px; font:inherit; font-size:12px }
 .gm-layout { display:grid; grid-template-columns:minmax(220px,32%) minmax(0,1fr); gap:1rem }
 .gm-layout aside,.gm-layout article { padding:1rem; background:white; border-radius:.5rem; min-width:0 }
 .gm-layout nav { max-height:70vh; overflow:auto }
 .gm-layout ul { list-style:none; padding-left:.85rem }
 .gm-layout summary { cursor:pointer }
 .gm-layout button { cursor:pointer; margin:.15rem; padding:.35rem .55rem }
+.gm-layout .button.primary { color:#fff; background:var(--green); border:0; padding:.5rem .8rem }
 .gm-layout nav button { border:0; background:transparent; color:inherit; text-align:left }
 .gm-layout [aria-current=page],.gm-layout [aria-pressed=true] { background:#205b46; color:white }
 .gm-layout article img { max-width:100%; height:auto }
@@ -76,3 +90,19 @@ footer { margin: 37px 0 0; padding-top: 17px; border-top: 1px solid var(--line);
 .gm-content table { border-collapse:collapse }
 .gm-content td,.gm-content th { border:1px solid #ced9d2; padding:.4rem }
 @media(max-width:720px){.gm-layout{grid-template-columns:1fr}.gm-layout nav{max-height:32vh}}
+.gm-tabs { display:flex; gap:.35rem; margin:0 0 .75rem }
+.gm-tabs button { border:1px solid var(--line); border-radius:6px; background:#f8faf8 }
+.gm-tabs button.active { background:var(--green); color:#fff; border-color:var(--green) }
+.gm-node-panels { display:grid; grid-template-columns:1.05fr .95fr; gap:1rem }
+.gm-node-panels section { padding:.75rem; border:1px solid var(--line); border-radius:8px }
+.place-card { margin:.5rem 0; padding:.6rem .75rem; border:1px solid var(--line); border-radius:8px }
+.party-setup .party-row { display:flex; gap:.6rem; align-items:center; margin:.45rem 0 }
+.party-layout { display:grid; grid-template-columns:minmax(16rem,280px) 1fr; gap:1.25rem; margin-top:1rem }
+.party-source { display:flex; gap:.7rem; align-items:flex-start; margin:.5rem 0; padding:.7rem .8rem; border:1px solid var(--line); border-radius:8px }
+.party-source.active { border:2px solid var(--green); background:#f5faf6 }
+.party-source.disabled { opacity:.55 }
+.sourceicon { flex:none; width:28px; height:28px; border-radius:6px; display:grid; place-items:center; background:#eaf1ec; color:var(--green); font-size:12px; font-weight:800 }
+.party-setup .label { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 .35rem }
+@media(max-width:720px){.party-layout{grid-template-columns:1fr}}
+.row-actions { display:flex; gap:.75rem; margin-top:1rem }
+@media(max-width:720px){.gm-node-panels{grid-template-columns:1fr}}

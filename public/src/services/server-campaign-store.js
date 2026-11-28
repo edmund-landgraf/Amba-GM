@@ -33,8 +33,11 @@ export function serverCampaignStore(ownerId, moduleId) {
         case "end": Object.assign(c, { sessionId }); break;
         case "position": Object.assign(c, { sessionId, pageId }); break;
         case "accept": Object.assign(c, { key, pageId, sessionId, degree, pcId: pcId ?? null, tableId: table.id }); break;
+        case "skip":
+        case "notApplicable": Object.assign(c, { key, pageId, sessionId, pcId: pcId ?? null, tableId: table.id }); break;
         case "correct": Object.assign(c, { key, pageId, degree, tableId: table.id }); break;
         case "remove": Object.assign(c, { key }); break;
+        case "setParty": Object.assign(c, { partyPcIds: command.partyPcIds ?? [] }); break;
         default: throw new Error("Unknown campaign operation.");
       }
       return execute({ action: "change", id, revision, expectedVersion, command: c });
